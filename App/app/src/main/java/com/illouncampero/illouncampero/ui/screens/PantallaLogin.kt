@@ -21,12 +21,10 @@ import com.illouncampero.illouncampero.R
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
 
 @Composable
-fun PantallaLogin(navController: NavController, authViewModel: AuthViewModel) {
+fun PantallaLogin(navController: NavController, viewModel: AuthViewModel) { // <--- Pasamos el ViewModel
     var email by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-
     val context = LocalContext.current
-    val auth = FirebaseAuth.getInstance()
 
     Column(
         modifier = Modifier
@@ -74,18 +72,13 @@ fun PantallaLogin(navController: NavController, authViewModel: AuthViewModel) {
         // BOTÓN: Iniciar Sesión
         Button(
             onClick = {
-                if (email.isNotEmpty() && contrasena.isNotEmpty()) {
-                    auth.signInWithEmailAndPassword(email, contrasena)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(context, "¡Bienvenidillo!", Toast.LENGTH_SHORT).show()
-                                navController.navigate("home") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            } else {
-                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
+                // LLAMAMOS AL VIEWMODEL
+                viewModel.login(email, contrasena) { success, error ->
+                    if (success) {
+                        navController.navigate("home") { popUpTo("login") { inclusive = true } }
+                    } else {
+                        Toast.makeText(context, "Error: $error", Toast.LENGTH_LONG).show()
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth().height(50.dp)
@@ -116,7 +109,6 @@ fun PantallaLogin(navController: NavController, authViewModel: AuthViewModel) {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
-                    // Lógica de recuperación aquí
                 }
             )
         }

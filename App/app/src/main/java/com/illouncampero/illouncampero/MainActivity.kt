@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Instancia única del ViewModel para toda la app
+        // Creamos el ViewModel aquí para que sea el mismo en toda la app
         val authViewModel = AuthViewModel()
 
         setContent {
@@ -24,15 +24,9 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 NavHost(navController = navController, startDestination = "login") {
-                    composable("login") {
-                        PantallaLogin(navController, authViewModel)
-                    }
-                    composable("registro") {
-                        PantallaRegistro(navController, authViewModel)
-                    }
-                    composable("home") {
-                        PantallaPrincipal(navController, authViewModel)
-                    }
+                    composable("login") { PantallaLogin(navController, authViewModel) }
+                    composable("registro") { PantallaRegistro(navController, authViewModel) }
+                    composable("home") { PantallaPrincipal(navController, authViewModel) }
                 }
             }
         }

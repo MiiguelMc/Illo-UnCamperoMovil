@@ -14,13 +14,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.illouncampero.illouncampero.model.Usuario
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
 
 @Composable
 fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel) {
-    // Estados para los campos
+    // Estados para los campos (UI State)
     var nombre by remember { mutableStateOf("") }
     var apellidos by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -28,15 +27,11 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
     var contrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
 
-    // Estados para el Pop-up (Dialog)
+    // Estados para controlar el Pop-up
     var mostrarDialogo by remember { mutableStateOf(false) }
     var mensajeDialogo by remember { mutableStateOf("") }
     var registroExitoso by remember { mutableStateOf(false) }
 
-    val auth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance()
-
-    // Usamos verticalScroll por si el teclado tapa los campos en móviles pequeños
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,63 +39,29 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Crear Cuenta en Illo",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
+        Text(text = "Crear Cuenta en Illo", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Campos de texto
+        // --- CAMPOS DE TEXTO ---
         OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(10.dp))
-
         OutlinedTextField(value = apellidos, onValueChange = { apellidos = it }, label = { Text("Apellidos") }, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = telefono,
-            onValueChange = { telefono = it },
-            label = { Text("Teléfono") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-        )
+        OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone))
         Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-        )
+        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email))
         Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = contrasena,
-            onValueChange = { contrasena = it },
-            label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
+        OutlinedTextField(value = contrasena, onValueChange = { contrasena = it }, label = { Text("Contraseña") }, modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation())
         Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = confirmarContrasena,
-            onValueChange = { confirmarContrasena = it },
-            label = { Text("Confirmar Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
+        OutlinedTextField(value = confirmarContrasena, onValueChange = { confirmarContrasena = it }, label = { Text("Confirmar Contraseña") }, modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation())
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Botón Registrarse
+        // --- BOTÓN REGISTRARSE ---
         Button(
             onClick = {
-                // 1. Validaciones básicas
+                // 1. Validaciones de la interfaz
                 if (nombre.isEmpty() || email.isEmpty() || contrasena.isEmpty()) {
                     mensajeDialogo = "Por favor, rellena los campos obligatorios."
                     mostrarDialogo = true
@@ -108,39 +69,23 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
                     mensajeDialogo = "Las contraseñas no coinciden."
                     mostrarDialogo = true
                 } else if (contrasena.length < 6) {
-                    mensajeDialogo = "La contraseña debe tener al menos 6 caracteres."
+                    mensajeDialogo = "La contraseña debe ser de al menos 6 caracteres."
                     mostrarDialogo = true
                 } else {
-                    // 2. Crear usuario en Firebase Auth
-                    auth.createUserWithEmailAndPassword(email, contrasena)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val uid = auth.currentUser?.uid
-                                // 3. Guardar datos extra en Firestore
-                                val datosUsuario = hashMapOf(
-                                    "nombre" to nombre,
-                                    "apellidos" to apellidos,
-                                    "telefono" to telefono,
-                                    "email" to email,
-                                    "rol" to "cliente"
-                                )
+                    // 2. CREAMOS EL OBJETO USUARIO
+                    val nuevoUsuario = Usuario(
+                        nombre = nombre,
+                        apellidos = apellidos,
+                        telefono = telefono,
+                        email = email
+                    )
 
-                                if (uid != null) {
-                                    db.collection("usuarios").document(uid)
-                                        .set(datosUsuario)
-                                        .addOnSuccessListener {
-                                            registroExitoso = true
-                                            mensajeDialogo = "¡Cuenta creada con éxito! Ya puedes pedir tus camperos."
-                                            mostrarDialogo = true
-                                        }
-                                }
-                            } else {
-                                // Error (ej: email ya registrado)
-                                registroExitoso = false
-                                mensajeDialogo = "Error: ${task.exception?.message}"
-                                mostrarDialogo = true
-                            }
-                        }
+                    // 3. LLAMAMOS AL VIEWMODEL (Él se encarga de Firebase)
+                    authViewModel.registrarUsuario(nuevoUsuario, contrasena) { exito, error ->
+                        registroExitoso = exito
+                        mensajeDialogo = error ?: "Ocurrió un error inesperado"
+                        mostrarDialogo = true
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth().height(50.dp)
@@ -153,7 +98,7 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
         }
     }
 
-    // --- EL POP-UP (AlertDialog) ---
+    // --- DIALOGO DE RESULTADO ---
     if (mostrarDialogo) {
         AlertDialog(
             onDismissRequest = { mostrarDialogo = false },
@@ -162,9 +107,7 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
             confirmButton = {
                 Button(onClick = {
                     mostrarDialogo = false
-                    if (registroExitoso) {
-                        navController.navigate("login") // Si todo fue bien, al login
-                    }
+                    if (registroExitoso) navController.navigate("login")
                 }) {
                     Text("Aceptar")
                 }

@@ -10,36 +10,32 @@ class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    // Estados para la UI
-    var isLoading by mutableStateOf(false)
-    var loginError by mutableStateOf<String?>(null)
+    // Estado para el nombre del usuario en la Home
     var nombreUsuario by mutableStateOf("Cargando...")
 
-    // Función de Login
-    fun login(email: String, pass: String, onSuccess: () -> Unit) {
-        isLoading = true
+    // Función para el LOGIN
+    fun login(email: String, pass: String, onResult: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
-            isLoading = false
-            if (task.isSuccessful) onSuccess()
-            else loginError = task.exception?.message
+            if (task.isSuccessful) onResult(true, null)
+            else onResult(false, task.exception?.message)
         }
     }
 
-    // Función de Registro
-    fun registrarUsuario(usuario: Usuario, pass: String, onResult: (Boolean, String) -> Unit) {
+    // Función para el REGISTRO
+    fun registrarUsuario(usuario: Usuario, pass: String, onResult: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(usuario.email, pass).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val uid = auth.currentUser?.uid ?: ""
                 db.collection("usuarios").document(uid).set(usuario.copy(uid = uid))
-                    .addOnSuccessListener { onResult(true, "¡Cuenta creada!") }
-                    .addOnFailureListener { onResult(false, it.message ?: "Error en DB") }
+                    .addOnSuccessListener { onResult(true, null) }
+                    .addOnFailureListener { onResult(false, it.message) }
             } else {
-                onResult(false, task.exception?.message ?: "Error Auth")
+                onResult(false, task.exception?.message)
             }
         }
     }
 
-    // Función para obtener nombre en Home
+    // Función para obtener el nombre del usuario
     fun obtenerNombreUsuario() {
         val uid = auth.currentUser?.uid
         if (uid != null) {
