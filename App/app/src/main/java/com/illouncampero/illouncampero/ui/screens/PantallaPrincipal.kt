@@ -1,4 +1,4 @@
-package com.illouncampero.illouncampero
+package com.illouncampero.illouncampero.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,10 +30,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,44 +37,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.illouncampero.illouncampero.R
+import com.illouncampero.illouncampero.viewmodel.AuthViewModel
 
 @Composable
-fun PantallaPrincipal(navController: NavController) {
-    // 1. Instancias de Firebase
-    val auth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance()
-    val azulOscuro = Color(0xFF0A0E21)
-
-    // 2. Variable de estado para guardar el nombre (empezamos con "Cargando...")
-    var nombreUsuario by remember { mutableStateOf("Cargando...") }
-
-    // 3. Efecto para buscar el nombre en la base de datos al entrar en la pantalla
+fun PantallaPrincipal(navController: NavController, viewModel: AuthViewModel) {
+    // Al cargar la pantalla, le pedimos al ViewModel que busque el nombre
     LaunchedEffect(Unit) {
-        val uid = auth.currentUser?.uid // Obtenemos el ID del usuario actual
-        if (uid != null) {
-            db.collection("usuarios").document(uid).get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        // Sacamos el campo "nombre" de la base de datos
-                        nombreUsuario = document.getString("nombre") ?: "Usuario"
-                    } else {
-                        nombreUsuario = "Invitado"
-                    }
-                }
-                .addOnFailureListener {
-                    nombreUsuario = "Error"
-                }
-        }
+        viewModel.obtenerNombreUsuario()
     }
 
+    val nombre = viewModel.nombreUsuario
     // --- EL RESTO DEL DISEÑO ---
     val naranjaIllo = Color(0xFFF39200)
     val verdeIllo = Color(0xFF008445)
+    val azulOscuro = Color(0xFF0A0E21)
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
@@ -101,7 +78,7 @@ fun PantallaPrincipal(navController: NavController) {
 
                 // AQUÍ ESTÁ EL CAMBIO: Ya no pone María, pone la variable
                 Text(
-                    text = nombreUsuario,
+                    text = nombre,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
@@ -159,7 +136,7 @@ fun PantallaPrincipal(navController: NavController) {
                         "Abiertos hasta las 3:00 AM",
                         color = Color.White,
                         modifier = Modifier.padding(12.dp),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = TextAlign.Center
                     )
                 }
 

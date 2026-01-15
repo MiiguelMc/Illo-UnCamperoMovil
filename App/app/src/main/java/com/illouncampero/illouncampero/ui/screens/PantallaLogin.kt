@@ -1,0 +1,124 @@
+package com.illouncampero.illouncampero.ui.screens
+
+import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.illouncampero.illouncampero.R
+import com.illouncampero.illouncampero.viewmodel.AuthViewModel
+
+@Composable
+fun PantallaLogin(navController: NavController, authViewModel: AuthViewModel) {
+    var email by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 30.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Logo
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = "Logo de Illo",
+            modifier = Modifier
+                .size(300.dp)
+                .padding(top = 20.dp)
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        // Campo Email
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Correo Electrónico") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+
+        Spacer(Modifier.height(15.dp))
+
+        // Campo Contraseña
+        OutlinedTextField(
+            value = contrasena,
+            onValueChange = { contrasena = it },
+            label = { Text("Contraseña") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        )
+
+        Spacer(Modifier.height(30.dp))
+
+        // BOTÓN: Iniciar Sesión
+        Button(
+            onClick = {
+                if (email.isNotEmpty() && contrasena.isNotEmpty()) {
+                    auth.signInWithEmailAndPassword(email, contrasena)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(context, "¡Bienvenidillo!", Toast.LENGTH_SHORT).show()
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            } else {
+                                Toast.makeText(context, "Error: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+        ) {
+            Text("INICIAR SESIÓN")
+        }
+
+        Spacer(Modifier.height(15.dp))
+
+        // BOTÓN: Registrarse
+        OutlinedButton(
+            onClick = { navController.navigate("registro") },
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+        ) {
+            Text("CREAR CUENTA NUEVA")
+        }
+
+        Spacer(Modifier.height(30.dp))
+
+        // Recuperar contraseña
+        Column {
+            Text(
+                text = "¿Has olvidado tu contraseña? ",
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = "Recuperar contraseña",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.CenterHorizontally).clickable {
+                    // Lógica de recuperación aquí
+                }
+            )
+        }
+    }
+}
