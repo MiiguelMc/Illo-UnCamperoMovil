@@ -83,7 +83,7 @@ fun PantallaRegistro(navController: NavController, authViewModel: AuthViewModel)
                     // 3. LLAMAMOS AL VIEWMODEL (Él se encarga de Firebase)
                     authViewModel.registrarUsuario(nuevoUsuario, contrasena) { exito, error ->
                         registroExitoso = exito
-                        mensajeDialogo = error ?: "Ocurrió un error inesperado"
+                        mensajeDialogo = error ?: "Has creado tu cuenta exitosamente"
                         mostrarDialogo = true
                     }
                 }

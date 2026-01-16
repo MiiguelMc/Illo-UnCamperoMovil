@@ -72,12 +72,14 @@ fun PantallaLogin(navController: NavController, viewModel: AuthViewModel) { // <
         // BOTÓN: Iniciar Sesión
         Button(
             onClick = {
-                // LLAMAMOS AL VIEWMODEL
-                viewModel.login(email, contrasena) { success, error ->
-                    if (success) {
-                        navController.navigate("home") { popUpTo("login") { inclusive = true } }
-                    } else {
-                        Toast.makeText(context, "Error: $error", Toast.LENGTH_LONG).show()
+                if (email.isNotEmpty() && contrasena.isNotEmpty()) {
+                    viewModel.login(email, contrasena) { success, error ->
+                        if (success) {
+                            // SI EL LOGIN ES CORRECTO, COMPROBAMOS EL ROL
+                            viewModel.verificarRolYEntrar(navController)
+                        } else {
+                            Toast.makeText(context, "Error: $error", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
             },

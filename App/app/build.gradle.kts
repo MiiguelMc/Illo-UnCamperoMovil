@@ -7,12 +7,19 @@ plugins {
 
 android {
     namespace = "com.illouncampero.illouncampero"
+    // Baja el compileSdk al 34 o 35 (el 36 es experimental y da problemas)
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.illouncampero.illouncampero"
-        minSdk = 35
-        targetSdk = 36
+
+        // ESTA ES LA LÍNEA CLAVE:
+        // Cámbialo a 24 o 26. Esto hará que funcione en el 99% de los móviles.
+        minSdk = 26
+
+        // El target debe coincidir con el compileSdk
+        targetSdk = 35
+
         versionCode = 1
         versionName = "1.0"
 
@@ -67,4 +74,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Las herramientas para hablar con Spring Boot
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }

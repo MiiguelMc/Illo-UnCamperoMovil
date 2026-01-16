@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.illouncampero.illouncampero.ui.screens.PantallaAdmin
 import com.illouncampero.illouncampero.ui.screens.PantallaLogin
 import com.illouncampero.illouncampero.ui.screens.PantallaPrincipal
 import com.illouncampero.illouncampero.ui.screens.PantallaRegistro
@@ -27,6 +28,8 @@ class MainActivity : ComponentActivity() {
                     composable("login") { PantallaLogin(navController, authViewModel) }
                     composable("registro") { PantallaRegistro(navController, authViewModel) }
                     composable("home") { PantallaPrincipal(navController, authViewModel) }
+                    // --- NUEVA RUTA PARA EL JEFE ---
+                    composable("admin_panel") { PantallaAdmin(navController, authViewModel) }
                 }
             }
         }
