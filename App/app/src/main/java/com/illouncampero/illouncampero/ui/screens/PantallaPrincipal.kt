@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.illouncampero.illouncampero.R
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
+import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
 import kotlinx.coroutines.launch
 
 // Colores globales para que todas las funciones los vean
@@ -68,13 +69,14 @@ val verdeIllo = Color(0xFF008445)
 val azulOscuro = Color(0xFF0A0E21)
 
 @Composable
-fun PantallaPrincipal(navController: NavController, viewModel: AuthViewModel) {
+fun PantallaPrincipal(navController: NavController, authViewModel: AuthViewModel, prodViewModel: ProductoViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val nombre = viewModel.nombreUsuario
+    val nombre = authViewModel.nombreUsuario
 
     LaunchedEffect(Unit) {
-        viewModel.obtenerNombreUsuario()
+        authViewModel.obtenerNombreUsuario()
+        prodViewModel.cargarProductos()
     }
 
     ModalNavigationDrawer(
@@ -83,7 +85,7 @@ fun PantallaPrincipal(navController: NavController, viewModel: AuthViewModel) {
             MenuLateral(
                 nombre = nombre,
                 onCerrarSesion = {
-                    viewModel.cerrarSesion {
+                    authViewModel.cerrarSesion {
                         navController.navigate("login") { popUpTo("home") { inclusive = true } }
                     }
                 }

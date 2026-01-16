@@ -1,7 +1,6 @@
 package com.illouncampero.illouncampero.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,144 +19,159 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.illouncampero.illouncampero.model.Producto
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
+import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaAdmin(navController: NavController, viewModel: AuthViewModel) {
-    // Estados para el formulario de nuevo producto
-    var nombreProducto by remember { mutableStateOf("") }
-    var precioProducto by remember { mutableStateOf("") }
-    var descripcionProducto by remember { mutableStateOf("") }
-
+fun PantallaAdmin(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    productoViewModel: ProductoViewModel
+) {
     val context = LocalContext.current
-
-    // Colores del diseño Admin
-    val azulAdmin = Color(0xFF1C1C1C) // Negro/Gris muy oscuro
+    val azulAdmin = Color(0xFF1C1C1C)
     val naranjaIllo = Color(0xFFF39200)
+
+    LaunchedEffect(Unit) {
+        productoViewModel.cargarProductos()
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Panel Admin - Illo", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text("Panel Admin - Illo", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = azulAdmin),
                 actions = {
                     IconButton(onClick = {
-                        viewModel.cerrarSesion {
-                            navController.navigate("login") {
-                                popUpTo("admin_panel") { inclusive = true }
-                            }
-                        }
+                        authViewModel.cerrarSesion { navController.navigate("login") { popUpTo(0) } }
                     }) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar Sesión", tint = Color.White)
+                        Icon(Icons.Default.ExitToApp, null, tint = Color.White)
                     }
                 }
             )
         }
     ) { padding ->
-        Column(
+        // USAMOS UN SOLO LAZYCOLUMN PARA TODO (Formulario + Lista)
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            // --- SECCIÓN: AÑADIR PRODUCTO ---
-            Text(text = "Añadir nuevo producto", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(10.dp))
+            // --- PARTE 1: EL FORMULARIO (metido en un 'item' para que no choque el scroll) ---
+            item {
+                Spacer(Modifier.height(16.dp))
+                Text("Gestión de Producto", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Spacer(Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = nombreProducto,
-                onValueChange = { nombreProducto = it },
-                label = { Text("Nombre del Campero") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = productoViewModel.nombreInput,
+                    onValueChange = { productoViewModel.nombreInput = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = precioProducto,
-                onValueChange = { precioProducto = it },
-                label = { Text("Precio (€)") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
+                Row(Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = productoViewModel.precioInput,
+                        onValueChange = { productoViewModel.precioInput = it },
+                        label = { Text("Precio") },
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    OutlinedTextField(
+                        value = productoViewModel.categoriaInput,
+                        onValueChange = { productoViewModel.categoriaInput = it },
+                        label = { Text("Categoría") },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-            OutlinedTextField(
-                value = descripcionProducto,
-                onValueChange = { descripcionProducto = it },
-                label = { Text("Descripción (Ingredientes)") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = productoViewModel.descripcionInput,
+                    onValueChange = { productoViewModel.descripcionInput = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(8.dp))
 
-            Button(
-                onClick = {
-                    if (nombreProducto.isNotEmpty() && precioProducto.isNotEmpty()) {
-                        // AQUÍ ES DONDE LLAMARÁS AL REPOSITORIO DE TU COLEGA (Retrofit)
-                        Toast.makeText(context, "Enviando a Spring Boot...", Toast.LENGTH_SHORT).show()
+                OutlinedTextField(
+                    value = productoViewModel.imagenURLInput,
+                    onValueChange = { productoViewModel.imagenURLInput = it },
+                    label = { Text("URL Imagen") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                        // Limpiar campos tras subir
-                        nombreProducto = ""
-                        precioProducto = ""
-                        descripcionProducto = ""
-                    } else {
-                        Toast.makeText(context, "Rellena nombre y precio", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo)
-            ) {
-                Text("SUBIR A LA CARTA", color = Color.White, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = productoViewModel.disponibleInput,
+                        onCheckedChange = { productoViewModel.disponibleInput = it }
+                    )
+                    Text("Disponible en carta")
+                }
+
+                Button(
+                    onClick = {
+                        productoViewModel.guardarProducto {
+                            Toast.makeText(context, "¡Producto guardado!", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo)
+                ) {
+                    if (productoViewModel.cargando) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    else Text("SUBIR PRODUCTO", fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(Modifier.height(24.dp))
+                HorizontalDivider(thickness = 2.dp)
+                Spacer(Modifier.height(16.dp))
+                Text("Productos actuales", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Spacer(Modifier.height(8.dp))
+
+                // Mensaje si no hay productos
+                if (productoViewModel.listaProductos.isEmpty() && !productoViewModel.cargando) {
+                    Text("No hay productos en la carta", color = Color.Gray)
+                }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 2.dp, color = Color.LightGray)
-
-            // --- SECCIÓN: GESTIÓN DE PRODUCTOS EXISTENTES ---
-            Text(text = "Productos en la carta", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Lista provisional (Esto se cargará de la BD de tu colega)
-            LazyColumn {
-                // Ejemplo de un ítem en la lista
-                item {
-                    FilaProductoAdmin("Campero Pollo", "5.50€")
-                    FilaProductoAdmin("Campero Mixto", "4.50€")
-                    FilaProductoAdmin("Papas Locas", "6.00€")
+            // --- PARTE 2: LA LISTA (usamos 'items') ---
+            items(productoViewModel.listaProductos) { producto ->
+                FilaProductoAdmin(producto) {
+                    productoViewModel.eliminarProducto(producto.getId())
                 }
+                Spacer(Modifier.height(8.dp))
             }
         }
     }
 }
 
 @Composable
-fun FilaProductoAdmin(nombre: String, precio: String) {
+fun FilaProductoAdmin(producto: Producto, onDelete: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                Text(text = nombre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(text = precio, color = Color.Gray)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = producto.getNombre(), fontWeight = FontWeight.Bold)
+                Text(text = "${producto.getPrecio()}€", color = Color.DarkGray)
+                Text(text = "Cat: ${producto.getCategoria()}", fontSize = 11.sp, color = Color.Gray)
             }
-            Row {
-                IconButton(onClick = { /* Lógica para editar */ }) {
-                    Icon(Icons.Default.ShoppingCart, contentDescription = "Stock", tint = Color.DarkGray)
-                }
-                IconButton(onClick = { /* Lógica para borrar en la BD */ }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
-                }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, "Borrar", tint = Color.Red)
             }
         }
     }
