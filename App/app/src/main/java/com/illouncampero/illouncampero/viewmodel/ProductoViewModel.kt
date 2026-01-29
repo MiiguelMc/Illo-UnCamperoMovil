@@ -38,10 +38,14 @@ class ProductoViewModel : ViewModel() {
         }
     }
 
-    fun guardarProducto(onSuccess: () -> Unit) {
-        val precio = precioInput.toDoubleOrNull() ?: 0.0
+    fun guardarProducto(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        // 1. Limpiamos el precio: cambiamos comas por puntos por si el usuario escribe "5,50"
+        val precioLimpio = precioInput.replace(",", ".")
+        val precio = precioLimpio.toDoubleOrNull() ?: 0.0
+
+        // 2. Validación básica antes de enviar
         if (nombreInput.isBlank() || precio <= 0) {
-            mensajeError = "Nombre y precio obligatorios"
+            onError("Nombre y precio (mayor a 0) son obligatorios")
             return
         }
 
@@ -49,6 +53,8 @@ class ProductoViewModel : ViewModel() {
             cargando = true
             try {
                 val nuevoProd = Producto(
+                    // Asegúrate de que el constructor de tu clase Producto
+                    // coincida con estos campos
                     nombre = nombreInput,
                     precio = precio,
                     descripcion = descripcionInput,
@@ -56,24 +62,48 @@ class ProductoViewModel : ViewModel() {
                     imagenURL = imagenURLInput,
                     disponible = disponibleInput
                 )
+
+                // 3. Llamada al repositorio
                 repository.subirNuevoCampero(nuevoProd)
+
+                // 4. Si todo va bien:
                 limpiarFormulario()
-                cargarProductos()
+                cargarProductos() // Recargamos la lista para ver el nuevo
                 onSuccess()
             } catch (e: Exception) {
-                mensajeError = "Error al guardar"
+                // 5. Capturamos el error real (aquí verás si es 403, 500, etc.)
+                onError("Error al guardar: ${e.localizedMessage}")
             } finally {
                 cargando = false
             }
         }
     }
 
-    fun eliminarProducto(id: String) {
+    fun eliminarProducto(id: String?, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        if (id.isNullOrEmpty()) {
+            onError("El ID del producto está vacío. Revisa si Firebase/SpringBoot lo están enviando.")
+            return
+        }
+
         viewModelScope.launch {
             try {
+                // 1. Intentamos borrar en el backend (SpringBoot)
                 repository.eliminarCampero(id)
-                listaProductos.removeIf { it.getId() == id }
-            } catch (e: Exception) { /* Gestionar error */ }
+
+                // 2. Si la llamada al repositorio no lanzó excepción, borramos de la lista local
+                // Usamos removeAll para asegurar que Compose detecte el cambio en el mutableStateListOf
+                val eliminado = listaProductos.removeAll { it.getId() == id }
+
+                if (eliminado) {
+                    onSuccess()
+                } else {
+                    // Si llegamos aquí, el ID se mandó al server pero no estaba en la lista de la pantalla
+                    cargarProductos() // Recargamos por si acaso
+                    onSuccess()
+                }
+            } catch (e: Exception) {
+                onError("Error al eliminar: ${e.localizedMessage}")
+            }
         }
     }
 

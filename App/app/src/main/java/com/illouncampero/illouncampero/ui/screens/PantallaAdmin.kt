@@ -52,6 +52,7 @@ fun PantallaAdmin(
                 }
             )
         }
+
     ) { padding ->
         // USAMOS UN SOLO LAZYCOLUMN PARA TODO (Formulario + Lista)
         LazyColumn(
@@ -120,15 +121,25 @@ fun PantallaAdmin(
 
                 Button(
                     onClick = {
-                        productoViewModel.guardarProducto {
-                            Toast.makeText(context, "¡Producto guardado!", Toast.LENGTH_SHORT).show()
-                        }
+                        productoViewModel.guardarProducto(
+                            onSuccess = {
+                                Toast.makeText(context, "¡Producto guardado con éxito!", Toast.LENGTH_SHORT).show()
+                            },
+                            onError = { mensaje ->
+                                // Si sale un 403, este Toast te lo dirá
+                                Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show()
+                            }
+                        )
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo)
+                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
+                    enabled = !productoViewModel.cargando // Desactivar si está cargando
                 ) {
-                    if (productoViewModel.cargando) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                    else Text("SUBIR PRODUCTO", fontWeight = FontWeight.Bold)
+                    if (productoViewModel.cargando) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("SUBIR PRODUCTO", fontWeight = FontWeight.Bold)
+                    }
                 }
 
                 Spacer(Modifier.height(24.dp))
@@ -144,9 +155,22 @@ fun PantallaAdmin(
             }
 
             // --- PARTE 2: LA LISTA (usamos 'items') ---
+            // ... resto del código anterior (formulario, etc.)
+
+// --- PARTE 2: LA LISTA ---
             items(productoViewModel.listaProductos) { producto ->
                 FilaProductoAdmin(producto) {
-                    productoViewModel.eliminarProducto(producto.getId())
+                    // Al hacer clic en el icono de papelera:
+                    productoViewModel.eliminarProducto(
+                        id = producto.getId(),
+                        onSuccess = {
+                            Toast.makeText(context, "Eliminado: ${producto.getNombre()}", Toast.LENGTH_SHORT).show()
+                        },
+                        onError = { mensajeError ->
+                            // Esto es vital: si no borra, el Toast te dirá por qué
+                            Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show()
+                        }
+                    )
                 }
                 Spacer(Modifier.height(8.dp))
             }
