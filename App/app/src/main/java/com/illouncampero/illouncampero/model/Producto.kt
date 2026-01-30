@@ -7,7 +7,7 @@ class Producto(
     @SerializedName("nombre") private var nombre: String = "",
     @SerializedName("descripcion") private var descripcion: String = "",
     @SerializedName("precio") private var precio: Double = 0.0,
-    @SerializedName("imagenURL") private var imagenURL: String = "",
+    @SerializedName("imagenUrl") private var imagenUrl: String = "",
     @SerializedName("categoria") private var categoria: String = "",
     @SerializedName("disponible") private var disponible: Boolean = true
 ) {
@@ -15,7 +15,7 @@ class Producto(
     fun getNombre() = nombre
     fun getDescripcion() = descripcion
     fun getPrecio() = precio
-    fun getImagenURL() = imagenURL
+    fun getImagenUrl() = imagenUrl
     fun getCategoria() = categoria
     fun isDisponible() = disponible
 }

@@ -8,5 +8,4 @@ data class Usuario(
     val telefono: String = "",
     val direccion: String = "",
     val rol: String = "CLIENTE"
-    // He quitado 'apellidos' porque no los veo en tu captura de la BD
 )

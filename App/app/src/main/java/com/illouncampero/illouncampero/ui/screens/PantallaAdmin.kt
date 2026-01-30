@@ -105,8 +105,8 @@ fun PantallaAdmin(
                 Spacer(Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = productoViewModel.imagenURLInput,
-                    onValueChange = { productoViewModel.imagenURLInput = it },
+                    value = productoViewModel.imagenUrlInput,
+                    onValueChange = { productoViewModel.imagenUrlInput = it },
                     label = { Text("URL Imagen") },
                     modifier = Modifier.fillMaxWidth()
                 )
