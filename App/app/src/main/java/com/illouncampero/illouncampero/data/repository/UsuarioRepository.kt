@@ -1,12 +1,16 @@
 package com.illouncampero.illouncampero.data.repository
 
+import Usuario
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.illouncampero.illouncampero.model.Usuario
+import com.illouncampero.illouncampero.data.network.RetrofitClient
+import kotlinx.coroutines.tasks.await
 
 class UsuarioRepository {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+
+    private val api = RetrofitClient.instancia // Tu cliente Retrofit
 
     // Lógica de Login
     fun login(email: String, pass: String, onResult: (Boolean, String?) -> Unit) {
@@ -46,6 +50,22 @@ class UsuarioRepository {
                 onResult(rol == "admin") // Devuelve true si el rol es admin
             }
         }
+    }
+
+    private suspend fun obtenerToken(): String {
+        return "Bearer ${FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token}"
+    }
+
+    suspend fun obtenerPerfil(): Usuario? {
+        val token = obtenerToken()
+        // Asegúrate de tener este endpoint en tu SpringBoot
+        return api.getPerfil(token).body()
+    }
+
+    suspend fun actualizarPerfil(usuario: Usuario) {
+        val token = obtenerToken()
+        // Asegúrate de tener este endpoint en tu SpringBoot (PUT)
+        api.updatePerfil(token, usuario)
     }
 
     fun getCurrentUid(): String? = auth.currentUser?.uid

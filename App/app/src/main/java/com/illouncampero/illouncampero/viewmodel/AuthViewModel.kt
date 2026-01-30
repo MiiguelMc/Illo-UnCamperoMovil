@@ -1,5 +1,6 @@
 package com.illouncampero.illouncampero.viewmodel
 
+import Usuario
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,7 +9,6 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.illouncampero.illouncampero.data.repository.UsuarioRepository
-import com.illouncampero.illouncampero.model.Usuario
 
 
 class AuthViewModel : ViewModel() {
@@ -40,18 +40,6 @@ class AuthViewModel : ViewModel() {
     fun cerrarSesion(onSuccess: () -> Unit) {
         repository.logout()
         onSuccess()
-    }
-
-    // En AuthViewModel.kt
-    fun subirProducto(nombre: String, precio: Double, descripcion: String) {
-        val producto = hashMapOf(
-            "nombre" to nombre,
-            "precio" to precio,
-            "descripcion" to descripcion,
-            "disponible" to true
-        )
-        db.collection("productos").add(producto)
-            .addOnSuccessListener { /* Toast de éxito */ }
     }
 
     // En AuthViewModel.kt

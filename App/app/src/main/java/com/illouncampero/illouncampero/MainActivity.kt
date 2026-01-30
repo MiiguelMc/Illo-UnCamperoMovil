@@ -13,6 +13,7 @@ import com.illouncampero.illouncampero.ui.screens.PantallaPrincipal
 import com.illouncampero.illouncampero.ui.screens.PantallaRegistro
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
 import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
+import com.illouncampero.illouncampero.viewmodel.UsuarioViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
         // Creamos el ViewModel aquí para que sea el mismo en toda la app
         val authViewModel = AuthViewModel()
         val productosViewModel = ProductoViewModel()
+        val usuarioViewModel = UsuarioViewModel()
 
         setContent {
             MaterialTheme {
@@ -33,6 +35,9 @@ class MainActivity : ComponentActivity() {
                     // --- NUEVA RUTA PARA EL JEFE ---
                     composable("admin_panel") { PantallaAdmin(navController, authViewModel, productosViewModel) }
 
+                    composable("configuracion") {
+                        com.illouncampero.illouncampero.ui.screens.PantallaConfiguracion(navController = navController, viewModel = usuarioViewModel)
+                    }
                 }
             }
         }

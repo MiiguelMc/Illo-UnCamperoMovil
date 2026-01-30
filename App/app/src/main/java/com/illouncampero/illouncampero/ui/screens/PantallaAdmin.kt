@@ -154,12 +154,15 @@ fun PantallaAdmin(
                 }
             }
 
-            // --- PARTE 2: LA LISTA (usamos 'items') ---
-            // ... resto del código anterior (formulario, etc.)
 
 // --- PARTE 2: LA LISTA ---
             items(productoViewModel.listaProductos) { producto ->
                 FilaProductoAdmin(producto) {
+
+                    // --- AÑADE ESTA LÍNEA AQUÍ ABAJO ---
+                    println("DEBUG_ILLO: El ID del producto '${producto.getNombre()}' es: '${producto.getId()}'")
+                    // ----------------------------------
+
                     // Al hacer clic en el icono de papelera:
                     productoViewModel.eliminarProducto(
                         id = producto.getId(),
@@ -167,7 +170,6 @@ fun PantallaAdmin(
                             Toast.makeText(context, "Eliminado: ${producto.getNombre()}", Toast.LENGTH_SHORT).show()
                         },
                         onError = { mensajeError ->
-                            // Esto es vital: si no borra, el Toast te dirá por qué
                             Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show()
                         }
                     )

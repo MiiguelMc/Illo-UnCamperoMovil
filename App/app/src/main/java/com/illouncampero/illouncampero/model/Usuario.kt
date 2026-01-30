@@ -1,11 +1,12 @@
-package com.illouncampero.illouncampero.model
-
+// EN EL MÓVIL (Kotlin)
 data class Usuario(
+    // Usa @SerializedName si en el JSON de SpringBoot se llaman distinto
     val uid: String = "",
     val nombre: String = "",
     val apellidos: String = "",
-    val telefono: String = "",
     val email: String = "",
+    val telefono: String = "",
     val direccion: String = "",
-    val rol: String = "cliente"
+    val rol: String = "CLIENTE"
+    // He quitado 'apellidos' porque no los veo en tu captura de la BD
 )

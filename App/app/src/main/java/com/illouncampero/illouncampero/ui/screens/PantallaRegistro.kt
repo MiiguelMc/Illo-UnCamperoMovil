@@ -1,5 +1,6 @@
 package com.illouncampero.illouncampero.ui.screens
 
+import Usuario
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,7 +15,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.illouncampero.illouncampero.model.Usuario
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
 
 @Composable
