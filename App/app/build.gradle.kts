@@ -55,7 +55,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")      // Para el Login
     implementation("com.google.firebase:firebase-firestore") // Para los Camperos
     implementation("com.google.firebase:firebase-storage")
-
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
     implementation(libs.androidx.core.ktx)

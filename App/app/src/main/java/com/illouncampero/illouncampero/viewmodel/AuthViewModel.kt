@@ -71,6 +71,17 @@ class AuthViewModel : ViewModel() {
                 }
         }
     }
+
+    fun revisarSesionActual(navController: NavController) {
+        if (auth.currentUser != null) {
+            verificarRolYEntrar(navController)
+        } else {
+            navController.navigate("login") {
+                // Borramos la Splash para que no puedan volver atrás
+                popUpTo("splash") { inclusive = true }
+            }
+        }
+    }
 }
 
 

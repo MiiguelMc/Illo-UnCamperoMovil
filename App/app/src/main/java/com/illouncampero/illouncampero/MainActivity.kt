@@ -11,7 +11,9 @@ import com.illouncampero.illouncampero.ui.screens.PantallaAdmin
 import com.illouncampero.illouncampero.ui.screens.PantallaLogin
 import com.illouncampero.illouncampero.ui.screens.PantallaPrincipal
 import com.illouncampero.illouncampero.ui.screens.PantallaRegistro
+import com.illouncampero.illouncampero.ui.screens.PantallaSplash
 import com.illouncampero.illouncampero.viewmodel.AuthViewModel
+import com.illouncampero.illouncampero.viewmodel.CarritoViewModel
 import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
 import com.illouncampero.illouncampero.viewmodel.UsuarioViewModel
 
@@ -23,18 +25,18 @@ class MainActivity : ComponentActivity() {
         val authViewModel = AuthViewModel()
         val productosViewModel = ProductoViewModel()
         val usuarioViewModel = UsuarioViewModel()
+        val carritoViewModel = CarritoViewModel()
 
         setContent {
             MaterialTheme {
                 val navController = rememberNavController()
 
-                NavHost(navController = navController, startDestination = "login") {
+                NavHost(navController = navController, startDestination = "splash") {
+                    composable("splash") { PantallaSplash(navController, authViewModel) }
                     composable("login") { PantallaLogin(navController, authViewModel) }
                     composable("registro") { PantallaRegistro(navController, authViewModel) }
-                    composable("home") { PantallaPrincipal(navController, authViewModel, productosViewModel) }
-                    // --- NUEVA RUTA PARA EL JEFE ---
+                    composable("home") {    PantallaPrincipal(navController, authViewModel, productosViewModel, carritoViewModel)} // <--- PASALO AQUÍ
                     composable("admin_panel") { PantallaAdmin(navController, authViewModel, productosViewModel) }
-
                     composable("configuracion") {
                         com.illouncampero.illouncampero.ui.screens.PantallaConfiguracion(navController = navController, viewModel = usuarioViewModel)
                     }
