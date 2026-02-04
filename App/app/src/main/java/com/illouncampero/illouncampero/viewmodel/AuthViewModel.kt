@@ -54,7 +54,7 @@ class AuthViewModel : ViewModel() {
                 .addOnSuccessListener { doc ->
                     if (doc != null && doc.exists()) {
                         val rol = doc.getString("rol")
-                        if (rol == "admin") {
+                        if (rol == "ADMIN") {
                             navController.navigate("admin_panel") {
                                 popUpTo("login") { inclusive = true }
                             }

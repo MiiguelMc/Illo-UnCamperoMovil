@@ -19,11 +19,20 @@ class ProductoRepository {
 
     suspend fun subirNuevoCampero(producto: Producto) {
         val token = obtenerToken()
-        api.addProducto(token, producto)
+        val respuesta = api.addProducto(token, producto)
+
+        // SI NO HACES ESTO, EL VM NUNCA SABRÁ QUE FALLÓ
+        if (!respuesta.isSuccessful) {
+            throw Exception("Error del servidor: ${respuesta.code()} - ${respuesta.errorBody()?.string()}")
+        }
     }
 
     suspend fun eliminarCampero(id: String) {
         val token = obtenerToken()
-        api.deleteProducto(token, id)
+        val respuesta = api.deleteProducto(token, id)
+
+        if (!respuesta.isSuccessful) {
+            throw Exception("No se pudo eliminar: ${respuesta.code()}")
+        }
     }
 }
