@@ -9,6 +9,7 @@ class Producto(
     @SerializedName("precio") private var precio: Double = 0.0,
     @SerializedName("imagenUrl") private var imagenUrl: String = "",
     @SerializedName("categoria") private var categoria: String = "",
+    @SerializedName("subcategoria") private val subcategoria: String = "", // <--- AÑADIR ESTO
     @SerializedName("disponible") private var disponible: Boolean = true
 ) {
     fun getId() = id
@@ -17,5 +18,7 @@ class Producto(
     fun getPrecio() = precio
     fun getImagenUrl() = imagenUrl
     fun getCategoria() = categoria
+
+    fun getSubcategoria() = subcategoria
     fun isDisponible() = disponible
 }

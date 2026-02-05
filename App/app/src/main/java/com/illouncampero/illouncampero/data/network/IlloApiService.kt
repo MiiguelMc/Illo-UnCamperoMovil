@@ -1,6 +1,7 @@
 package com.illouncampero.illouncampero.data.network
 
 import Usuario
+import com.illouncampero.illouncampero.model.Pedido
 import com.illouncampero.illouncampero.model.Producto
 import retrofit2.Response
 import retrofit2.http.Body
@@ -49,5 +50,10 @@ interface IlloApiService {
         @Header("Authorization") token: String,
         @Body usuario: Usuario
     ): Response<Unit>
-
+    // ... dentro de interface IlloApiService
+    @POST("api/pedidos/realizar-pedido")
+    suspend fun realizarPedido(
+        @Header("Authorization") token: String,
+        @Body pedido: Pedido
+    ): Response<Unit>
 }

@@ -1,22 +1,27 @@
 package com.illouncampero.illouncampero.ui.screens
 
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,10 +30,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.illouncampero.illouncampero.R
 import com.illouncampero.illouncampero.model.Producto
-import com.illouncampero.illouncampero.viewmodel.AuthViewModel
-import com.illouncampero.illouncampero.viewmodel.CarritoViewModel
-import com.illouncampero.illouncampero.viewmodel.ItemCarrito
-import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
+import com.illouncampero.illouncampero.viewmodel.*
 import kotlinx.coroutines.launch
 
 // --- COLORES ---
@@ -43,7 +45,8 @@ fun PantallaPrincipal(
     navController: NavController,
     authViewModel: AuthViewModel,
     prodViewModel: ProductoViewModel,
-    carritoViewModel: CarritoViewModel
+    carritoViewModel: CarritoViewModel,
+    usuarioViewModel: UsuarioViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -114,14 +117,13 @@ fun PantallaPrincipal(
                 when (selectedTab) {
                     0 -> SeccionInicio { selectedTab = 1 }
                     1 -> SeccionCarta(prodViewModel, carritoViewModel)
-                    2 -> SeccionCesta(carritoViewModel)
+                    2 -> SeccionCesta(carritoViewModel, usuarioViewModel)
                 }
             }
         }
     }
 }
 
-// --- PESTAÑA 0: INICIO ---
 @Composable
 fun SeccionInicio(onVerCarta: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -140,17 +142,54 @@ fun SeccionInicio(onVerCarta: () -> Unit) {
     }
 }
 
-// --- PESTAÑA 1: CARTA ---
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoViewModel) {
+    val categoriasPrincipales = listOf("Campero", "Entrantes", "Postres", "Bebidas")
+    var catSeleccionada by remember { mutableStateOf("Campero") }
+
+    // Agrupación de productos segura
+    val productosFiltrados = remember(prodViewModel.listaProductos, catSeleccionada) {
+        prodViewModel.listaProductos
+            .filter { it.getCategoria() == catSeleccionada }
+            .groupBy { it.getSubcategoria() }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        Text("Nuestra Carta", modifier = Modifier.padding(16.dp), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK)
+        ScrollableTabRow(
+            selectedTabIndex = categoriasPrincipales.indexOf(catSeleccionada).coerceAtLeast(0),
+            containerColor = Color.White,
+            contentColor = naranjaIllo,
+            edgePadding = 16.dp,
+            divider = {}
+        ) {
+            categoriasPrincipales.forEach { cat ->
+                Tab(
+                    selected = catSeleccionada == cat,
+                    onClick = { catSeleccionada = cat },
+                    text = { Text(cat, fontWeight = FontWeight.Bold) }
+                )
+            }
+        }
+
         if (prodViewModel.cargando) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = naranjaIllo) }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(prodViewModel.listaProductos) { producto ->
-                    FilaProductoCliente(producto) { carritoViewModel.añadirProducto(producto) }
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                // Usamos entries para evitar errores de ambigüedad component1/2
+                productosFiltrados.entries.forEach { entry ->
+                    val subCat = entry.key
+                    val lista = entry.value
+
+                    stickyHeader {
+                        Box(modifier = Modifier.fillMaxWidth().background(CremaBK).padding(16.dp, 8.dp)) {
+                            Text(if (subCat.isBlank()) "Varios" else subCat, fontWeight = FontWeight.Bold, color = MarronBK)
+                        }
+                    }
+
+                    items(lista) { producto ->
+                        FilaProductoCliente(producto) { carritoViewModel.añadirProducto(producto) }
+                    }
                 }
             }
         }
@@ -160,50 +199,76 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
 @Composable
 fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(15.dp),
+        modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = producto.getImagenUrl() ?: "",
                 contentDescription = null,
-                modifier = Modifier.size(90.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.logo),
                 error = painterResource(id = R.drawable.logo)
             )
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(producto.getNombre() ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MarronBK)
                 Text(producto.getDescripcion() ?: "", fontSize = 12.sp, color = Color.Gray, maxLines = 2)
-                Text("${producto.getPrecio()}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 17.sp)
+                Text("${producto.getPrecio()}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 18.sp)
             }
-            IconButton(onClick = onAdd) {
-                Icon(Icons.Default.AddCircle, null, tint = RojoBK, modifier = Modifier.size(32.dp))
+            Surface(onClick = onAdd, shape = CircleShape, color = RojoBK, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.padding(8.dp))
             }
         }
     }
 }
 
-// --- PESTAÑA 2: CESTA (TU PEDIDO) ---
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SeccionCesta(carritoViewModel: CarritoViewModel) {
+fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioViewModel) {
+    val context = LocalContext.current
+    var mostrarPagoFake by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Text("Tu Pedido", modifier = Modifier.padding(16.dp), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK)
 
         if (carritoViewModel.items.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("La cesta está vacía", color = Color.Gray)
-            }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("Cesta vacía", color = Color.Gray) }
         } else {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(carritoViewModel.items) { item ->
-                    FilaProductoCarrito(item, carritoViewModel)
+                    ListItem(
+                        headlineContent = { Text(item.producto.getNombre(), fontWeight = FontWeight.Bold) },
+                        supportingContent = { Text("${item.producto.getPrecio()}€ x ${item.cantidad}") },
+                        trailingContent = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { carritoViewModel.quitarProducto(item.producto) }) { Icon(Icons.Default.RemoveCircleOutline, null, tint = RojoBK) }
+                                Text("${item.cantidad}", fontWeight = FontWeight.Bold)
+                                IconButton(onClick = { carritoViewModel.añadirProducto(item.producto) }) { Icon(Icons.Default.AddCircle, null, tint = naranjaIllo) }
+                            }
+                        }
+                    )
+                }
+                item {
+                    OutlinedTextField(
+                        value = carritoViewModel.notasInput,
+                        onValueChange = { carritoViewModel.notasInput = it },
+                        label = { Text("Notas para el restaurante") },
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+                item {
+                    Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "Efectivo", onClick = { carritoViewModel.metodoPagoSeleccionado = "Efectivo" }, label = { Text("Efectivo") })
+                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "Tarjeta", onClick = { carritoViewModel.metodoPagoSeleccionado = "Tarjeta" }, label = { Text("Tarjeta") })
+                    }
                 }
             }
-            // RESUMEN Y PAGO
+
             Surface(tonalElevation = 8.dp, color = Color.White, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)) {
                 Column(Modifier.padding(20.dp)) {
                     Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
@@ -211,43 +276,54 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel) {
                         Text("${String.format("%.2f", carritoViewModel.calcularTotal())}€", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = RojoBK)
                     }
                     Button(
-                        onClick = { /* FASE 3: API Pedidos */ },
+                        onClick = {
+                            if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") mostrarPagoFake = true
+                            else {
+                                carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion, {
+                                    Toast.makeText(context, "Pedido enviado", Toast.LENGTH_SHORT).show()
+                                }, { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp).height(50.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        enabled = !carritoViewModel.enviandoPedido
                     ) {
-                        Text("FINALIZAR PEDIDO", fontWeight = FontWeight.Bold)
+                        if (carritoViewModel.enviandoPedido) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        else Text("REALIZAR PEDIDO", fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
     }
-}
 
-@Composable
-fun FilaProductoCarrito(item: ItemCarrito, viewModel: CarritoViewModel) {
-    ListItem(
-        headlineContent = { Text(item.producto.getNombre(), fontWeight = FontWeight.Bold) },
-        supportingContent = { Text("${item.producto.getPrecio()}€ x ${item.cantidad}") },
-        leadingContent = {
-            AsyncImage(model = item.producto.getImagenUrl(), contentDescription = null, modifier = Modifier.size(50.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop)
-        },
-        trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { viewModel.quitarProducto(item.producto) }) {
-                    Icon(Icons.Default.RemoveCircleOutline, null, tint = RojoBK)
+    if (mostrarPagoFake) {
+        AlertDialog(
+            onDismissRequest = { mostrarPagoFake = false },
+            title = { Text("Pago Seguro") },
+            text = {
+                Column {
+                    Text("Total: ${String.format("%.2f", carritoViewModel.calcularTotal())}€")
+                    OutlinedTextField(value = "", onValueChange = {}, label = { Text("Nº Tarjeta") }, modifier = Modifier.padding(top = 12.dp))
+                    Row(Modifier.padding(top = 8.dp)) {
+                        OutlinedTextField(value = "", onValueChange = {}, label = { Text("Exp") }, modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(8.dp))
+                        OutlinedTextField(value = "", onValueChange = {}, label = { Text("CVV") }, modifier = Modifier.weight(1f))
+                    }
                 }
-                Text("${item.cantidad}", fontWeight = FontWeight.Bold)
-                IconButton(onClick = { viewModel.añadirProducto(item.producto) }) {
-                    Icon(Icons.Default.AddCircle, null, tint = naranjaIllo)
-                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    mostrarPagoFake = false
+                    carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion, {
+                        Toast.makeText(context, "Pago realizado", Toast.LENGTH_SHORT).show()
+                    }, { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
+                }) { Text("Pagar Ahora") }
             }
-        }
-    )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+        )
+    }
 }
 
-// --- OTROS COMPONENTES ---
 @Composable
 fun MenuLateral(nombre: String, navController: NavController, drawerState: DrawerState, onCerrar: () -> Unit) {
     val scope = rememberCoroutineScope()

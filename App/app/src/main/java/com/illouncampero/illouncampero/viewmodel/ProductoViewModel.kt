@@ -20,6 +20,9 @@ class ProductoViewModel : ViewModel() {
     var precioInput by mutableStateOf("")
     var descripcionInput by mutableStateOf("")
     var categoriaInput by mutableStateOf("")
+
+    var subcategoriaInput by mutableStateOf("")
+
     var imagenUrlInput by mutableStateOf("")
     var disponibleInput by mutableStateOf(true)
 
@@ -59,6 +62,7 @@ class ProductoViewModel : ViewModel() {
                     precio = precio,
                     descripcion = descripcionInput,
                     categoria = categoriaInput,
+                    subcategoria = subcategoriaInput,
                     imagenUrl = imagenUrlInput,
                     disponible = disponibleInput
                 )
@@ -113,6 +117,7 @@ class ProductoViewModel : ViewModel() {
         descripcionInput = ""
         categoriaInput = ""
         imagenUrlInput = ""
+        subcategoriaInput = ""
         disponibleInput = true
     }
 }

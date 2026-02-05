@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     composable("splash") { PantallaSplash(navController, authViewModel) }
                     composable("login") { PantallaLogin(navController, authViewModel) }
                     composable("registro") { PantallaRegistro(navController, authViewModel) }
-                    composable("home") {    PantallaPrincipal(navController, authViewModel, productosViewModel, carritoViewModel)} // <--- PASALO AQUÍ
+                    composable("home") {    PantallaPrincipal(navController, authViewModel, productosViewModel, carritoViewModel,usuarioViewModel)} // <--- PASALO AQUÍ
                     composable("admin_panel") { PantallaAdmin(navController, authViewModel, productosViewModel) }
                     composable("configuracion") {
                         com.illouncampero.illouncampero.ui.screens.PantallaConfiguracion(navController = navController, viewModel = usuarioViewModel)
