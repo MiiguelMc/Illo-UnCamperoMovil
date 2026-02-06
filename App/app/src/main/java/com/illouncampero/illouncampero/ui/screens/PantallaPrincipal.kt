@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +59,7 @@ fun PantallaPrincipal(
     LaunchedEffect(Unit) {
         authViewModel.obtenerNombreUsuario()
         prodViewModel.cargarProductos()
+        usuarioViewModel.cargarPerfil()
     }
 
     ModalNavigationDrawer(
@@ -142,60 +145,93 @@ fun SeccionInicio(onVerCarta: () -> Unit) {
     }
 }
 
+
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoViewModel) {
-    val categoriasPrincipales = listOf("Campero", "Entrantes", "Postres", "Bebidas")
-    var catSeleccionada by remember { mutableStateOf("Campero") }
-
-    // Agrupación de productos segura
-    val productosFiltrados = remember(prodViewModel.listaProductos, catSeleccionada) {
-        prodViewModel.listaProductos
-            .filter { it.getCategoria() == catSeleccionada }
-            .groupBy { it.getSubcategoria() }
-    }
+    val categoriasPrincipales = listOf("campero", "entrantes", "postres", "bebidas")
+    val pagerState = rememberPagerState(pageCount = { categoriasPrincipales.size })
+    val scope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
         ScrollableTabRow(
-            selectedTabIndex = categoriasPrincipales.indexOf(catSeleccionada).coerceAtLeast(0),
+            selectedTabIndex = pagerState.currentPage,
             containerColor = Color.White,
             contentColor = naranjaIllo,
             edgePadding = 16.dp,
-            divider = {}
+            divider = {},
+            indicator = { tabPositions ->
+                if (pagerState.currentPage < tabPositions.size) {
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                        color = naranjaIllo
+                    )
+                }
+            }
         ) {
-            categoriasPrincipales.forEach { cat ->
+            categoriasPrincipales.forEachIndexed { index, cat ->
                 Tab(
-                    selected = catSeleccionada == cat,
-                    onClick = { catSeleccionada = cat },
-                    text = { Text(cat, fontWeight = FontWeight.Bold) }
+                    selected = pagerState.currentPage == index,
+                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                    text = { Text(cat.uppercase(), fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                 )
             }
         }
 
         if (prodViewModel.cargando) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = naranjaIllo) }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = naranjaIllo)
+            }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                // Usamos entries para evitar errores de ambigüedad component1/2
-                productosFiltrados.entries.forEach { entry ->
-                    val subCat = entry.key
-                    val lista = entry.value
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { pageIndex ->
+                val catActual = categoriasPrincipales[pageIndex]
 
-                    stickyHeader {
-                        Box(modifier = Modifier.fillMaxWidth().background(CremaBK).padding(16.dp, 8.dp)) {
-                            Text(if (subCat.isBlank()) "Varios" else subCat, fontWeight = FontWeight.Bold, color = MarronBK)
+                // --- AQUÍ ESTABA EL ERROR: AÑADIMOS ( ?: "" ) ANTES DEL TRIM ---
+                val productosFiltradosYAgrupados = remember(prodViewModel.listaProductos, catActual) {
+                    prodViewModel.listaProductos
+                        .filter {
+                            val categoriaEnDB = it.getCategoria() ?: "" // Si es null, usa texto vacío
+                            categoriaEnDB.trim().lowercase() == catActual.lowercase()
                         }
-                    }
+                        .groupBy {
+                            val subcatEnDB = it.getSubcategoria() ?: "Varios" // Si es null, usa "Varios"
+                            subcatEnDB.trim()
+                        }
+                }
 
-                    items(lista) { producto ->
-                        FilaProductoCliente(producto) { carritoViewModel.añadirProducto(producto) }
+                if (productosFiltradosYAgrupados.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No hay productos en ${catActual.uppercase()}", color = Color.Gray)
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 100.dp)) {
+                        productosFiltradosYAgrupados.forEach { (subCat, productos) ->
+                            stickyHeader {
+                                Box(modifier = Modifier.fillMaxWidth().background(CremaBK).padding(16.dp, 8.dp)) {
+                                    Text(
+                                        text = if (subCat.isBlank()) "VARIOS" else subCat.uppercase(),
+                                        fontWeight = FontWeight.Black,
+                                        color = MarronBK,
+                                        fontSize = 13.sp
+                                    )
+                                }
+                            }
+                            items(productos) { producto ->
+                                FilaProductoCliente(producto) {
+                                    carritoViewModel.añadirProducto(producto)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
     Card(
@@ -277,11 +313,23 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                     }
                     Button(
                         onClick = {
-                            if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") mostrarPagoFake = true
-                            else {
-                                carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion, {
-                                    Toast.makeText(context, "Pedido enviado", Toast.LENGTH_SHORT).show()
-                                }, { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
+                            // 1. VALIDACIÓN: Si faltan datos básicos, mandamos al usuario a rellenarlos
+                            if (usuarioViewModel.nombre.isBlank() || usuarioViewModel.direccion.isBlank() || usuarioViewModel.telefono.isBlank()) {
+                                Toast.makeText(context, "Por favor, rellena tus datos en 'Mi Perfil' para poder pedir", Toast.LENGTH_LONG).show()
+                                // Opcional: navegar automáticamente
+                                // navController.navigate("configuracion")
+                            } else {
+                                // 2. Si todo está ok, procedemos según el método de pago
+                                if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") mostrarPagoFake = true
+                                else {
+                                    carritoViewModel.finalizarPedido(
+                                        usuarioViewModel.nombre,
+                                        usuarioViewModel.telefono,
+                                        usuarioViewModel.direccion,
+                                        { Toast.makeText(context, "¡Pedido enviado!", Toast.LENGTH_SHORT).show() },
+                                        { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                    )
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().padding(top = 16.dp).height(50.dp),

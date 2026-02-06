@@ -14,7 +14,6 @@ class UsuarioViewModel : ViewModel() {
     private val repository = UsuarioRepository()
     private val auth = FirebaseAuth.getInstance()
 
-    // Estados de la UI
     var nombre by mutableStateOf("")
     var email by mutableStateOf("")
     var telefono by mutableStateOf("")
@@ -24,22 +23,21 @@ class UsuarioViewModel : ViewModel() {
 
     fun cargarPerfil() {
         val user = auth.currentUser ?: return
+        val uid = user.uid
         email = user.email ?: ""
 
         viewModelScope.launch {
             cargando = true
-            try {
-                val perfil = repository.obtenerPerfil()
-                if (perfil != null) {
-                    nombre = perfil.nombre
-                    telefono = perfil.telefono
-                    direccion = perfil.direccion ?: ""
-                }
-            } catch (e: Exception) {
-                mensaje = "Error al cargar datos"
-            } finally {
-                cargando = false
+            // Ahora esto funcionará porque el repository devuelve un Usuario?
+            val perfil = repository.obtenerPerfilDirecto(uid)
+
+            if (perfil != null) {
+                nombre = perfil.nombre
+                telefono = perfil.telefono
+                direccion = perfil.direccion ?: ""
+                println("DEBUG_ILLO: Perfil cargado correctamente")
             }
+            cargando = false
         }
     }
 
@@ -48,6 +46,7 @@ class UsuarioViewModel : ViewModel() {
             cargando = true
             try {
                 val usuarioActualizado = Usuario(
+                    uid = auth.currentUser?.uid ?: "",
                     nombre = nombre,
                     email = email,
                     telefono = telefono,
@@ -69,11 +68,7 @@ class UsuarioViewModel : ViewModel() {
         if (correo != null) {
             auth.sendPasswordResetEmail(correo)
                 .addOnCompleteListener { task ->
-                    mensaje = if (task.isSuccessful) {
-                        "Correo de restablecimiento enviado a $correo"
-                    } else {
-                        "Error al enviar el correo"
-                    }
+                    mensaje = if (task.isSuccessful) "Correo enviado a $correo" else "Error al enviar"
                 }
         }
     }

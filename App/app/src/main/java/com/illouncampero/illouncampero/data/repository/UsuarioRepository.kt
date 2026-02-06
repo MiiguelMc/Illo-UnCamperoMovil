@@ -20,7 +20,17 @@ class UsuarioRepository {
         }
     }
 
-    // Lógica de Registro
+        // LA FUNCIÓN DEBE SER ASÍ PARA QUE EL VIEWMODEL LA ENTIENDA
+        suspend fun obtenerPerfilDirecto(uid: String): Usuario? {
+            return try {
+                // El .await() es lo que hace que 'val perfil' en el VM sea un Usuario y no una tarea
+                val snapshot = db.collection("usuarios").document(uid).get().await()
+                snapshot.toObject(Usuario::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        // Lógica de Registro
     fun registrar(usuario: Usuario, pass: String, onResult: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(usuario.email, pass).addOnCompleteListener { task ->
             if (task.isSuccessful) {
