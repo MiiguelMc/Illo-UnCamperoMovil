@@ -56,4 +56,10 @@ interface IlloApiService {
         @Header("Authorization") token: String,
         @Body pedido: Pedido
     ): Response<Unit>
+
+    @GET("api/pedidos/usuario/{uid}")
+    suspend fun getMisPedidos(
+        @Header("Authorization") token: String,
+        @Path("uid") uid: String // <--- Añadimos el UID aquí
+    ): List<Pedido>
 }

@@ -381,6 +381,16 @@ fun MenuLateral(nombre: String, navController: NavController, drawerState: Drawe
         }
         NavigationDrawerItem(label = { Text("Mi Perfil") }, selected = false, icon = { Icon(Icons.Default.Person, null) }, onClick = { scope.launch { drawerState.close() }; navController.navigate("configuracion") })
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        NavigationDrawerItem(
+            label = { Text("Mis Pedidos") },
+            selected = false,
+            icon = { Icon(Icons.Default.List, null) },
+            onClick = {
+                scope.launch { drawerState.close() } // Cerramos el drawer
+                navController.navigate("mis_pedidos") // Navegamos
+            }
+        )
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
         NavigationDrawerItem(label = { Text("Cerrar Sesión", color = Color.Red) }, selected = false, icon = { Icon(Icons.Default.ExitToApp, null, tint = Color.Red) }, onClick = onCerrar)
     }
 }
