@@ -4,8 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
@@ -54,20 +56,47 @@ fun PantallaAdmin(
         }
 
     ) { padding ->
-        // USAMOS UN SOLO LAZYCOLUMN PARA TODO (Formulario + Lista)
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // --- PARTE 1: EL FORMULARIO (metido en un 'item' para que no choque el scroll) ---
+            // --- BOTÓN NUEVO: GESTIÓN DE COCINA ---
+            item {
+                Button(
+                    onClick = { navController.navigate("pantalla_cocina") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                        .height(65.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "GESTIÓN DE COCINA",
+                        fontWeight = FontWeight.Black,
+                        fontSize = 18.sp,
+                        color = Color.White
+                    )
+                }
+                HorizontalDivider(thickness = 2.dp)
+            }
+
+            // --- PARTE 1: EL FORMULARIO ---
             item {
                 Spacer(Modifier.height(16.dp))
                 Text("Gestión de Producto", fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 Spacer(Modifier.height(16.dp))
 
-                // 1. NOMBRE (Ancho completo)
                 OutlinedTextField(
                     value = productoViewModel.nombreInput,
                     onValueChange = { productoViewModel.nombreInput = it },
@@ -77,7 +106,6 @@ fun PantallaAdmin(
 
                 Spacer(Modifier.height(8.dp))
 
-                // 2. PRECIO (Ancho completo para que sea más fácil de dar)
                 OutlinedTextField(
                     value = productoViewModel.precioInput,
                     onValueChange = { productoViewModel.precioInput = it },
@@ -88,13 +116,12 @@ fun PantallaAdmin(
 
                 Spacer(Modifier.height(8.dp))
 
-                // 3. CATEGORÍA Y SUBCATEGORÍA (En la misma fila)
                 Row(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = productoViewModel.categoriaInput,
                         onValueChange = { productoViewModel.categoriaInput = it },
                         label = { Text("Categoría") },
-                        modifier = Modifier.weight(1f), // Ahora sí funciona porque está en un Row
+                        modifier = Modifier.weight(1f),
                         placeholder = { Text("Ej: Camperos") }
                     )
                     Spacer(Modifier.width(8.dp))
@@ -102,14 +129,13 @@ fun PantallaAdmin(
                         value = productoViewModel.subcategoriaInput,
                         onValueChange = { productoViewModel.subcategoriaInput = it },
                         label = { Text("Subcategoría") },
-                        modifier = Modifier.weight(1f), // Ahora sí funciona
+                        modifier = Modifier.weight(1f),
                         placeholder = { Text("Ej: Pollo") }
                     )
                 }
 
                 Spacer(Modifier.height(8.dp))
 
-                // 4. DESCRIPCIÓN (Ancho completo)
                 OutlinedTextField(
                     value = productoViewModel.descripcionInput,
                     onValueChange = { productoViewModel.descripcionInput = it },
@@ -119,7 +145,6 @@ fun PantallaAdmin(
 
                 Spacer(Modifier.height(8.dp))
 
-                // 5. URL IMAGEN (Ancho completo)
                 OutlinedTextField(
                     value = productoViewModel.imagenUrlInput,
                     onValueChange = { productoViewModel.imagenUrlInput = it },
@@ -127,7 +152,6 @@ fun PantallaAdmin(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // 6. CHECKBOX DISPONIBLE
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = productoViewModel.disponibleInput,
@@ -138,7 +162,6 @@ fun PantallaAdmin(
 
                 Spacer(Modifier.height(16.dp))
 
-                // 7. BOTÓN DE SUBIDA
                 Button(
                     onClick = {
                         productoViewModel.guardarProducto(
@@ -172,16 +195,10 @@ fun PantallaAdmin(
                 }
             }
 
-
-// --- PARTE 2: LA LISTA ---
+            // --- PARTE 2: LA LISTA ---
             items(productoViewModel.listaProductos) { producto ->
                 FilaProductoAdmin(producto) {
-
-                    // --- AÑADE ESTA LÍNEA AQUÍ ABAJO ---
                     println("DEBUG_ILLO: El ID del producto '${producto.getNombre()}' es: '${producto.getId()}'")
-                    // ----------------------------------
-
-                    // Al hacer clic en el icono de papelera:
                     productoViewModel.eliminarProducto(
                         id = producto.getId(),
                         onSuccess = {

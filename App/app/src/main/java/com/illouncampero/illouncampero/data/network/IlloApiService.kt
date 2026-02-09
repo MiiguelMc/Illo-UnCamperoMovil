@@ -3,14 +3,17 @@ package com.illouncampero.illouncampero.data.network
 import Usuario
 import com.illouncampero.illouncampero.model.Pedido
 import com.illouncampero.illouncampero.model.Producto
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface IlloApiService {
     // El GET es público según tu SecurityConfig, no necesita token
@@ -62,4 +65,17 @@ interface IlloApiService {
         @Header("Authorization") token: String,
         @Path("uid") uid: String // <--- Añadimos el UID aquí
     ): List<Pedido>
+
+    @PATCH("api/pedidos/{id}/estado")
+    suspend fun actualizarEstadoPedido(
+        @Header("Authorization") token: String,
+        @Path("id") id: String,
+        @Query("nuevoEstado") nuevoEstado: String
+    ): retrofit2.Response<String>
+
+    @GET("api/pedidos/activos") // Asegúrate de que esta sea la ruta en tu Spring Boot
+    suspend fun getTodosLosPedidos(
+        @Header("Authorization") token: String
+    ): List<Pedido>
+
 }

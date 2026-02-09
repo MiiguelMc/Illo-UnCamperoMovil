@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.illouncampero.illouncampero.ui.screens.PantallaAdmin
+import com.illouncampero.illouncampero.ui.screens.PantallaCocina
 import com.illouncampero.illouncampero.ui.screens.PantallaDetallePedido
 import com.illouncampero.illouncampero.ui.screens.PantallaLogin
 import com.illouncampero.illouncampero.ui.screens.PantallaMisPedidos
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("mis_pedidos") { PantallaMisPedidos(navController, pedidoViewModel) }
                     composable("detalle_pedido") { PantallaDetallePedido(navController, pedidoViewModel) }
+                    composable("pantalla_cocina") { PantallaCocina(navController, pedidoViewModel) }
                 }
             }
         }
