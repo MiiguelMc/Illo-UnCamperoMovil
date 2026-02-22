@@ -12,6 +12,9 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,20 +72,30 @@ fun PantallaCocina(navController: NavController, viewModel: PedidoViewModel) {
                     modifier = Modifier.align(Alignment.Center),
                     color = Color.Gray
                 )
-            } else {
+            }  else {
+                // ESTA LÍNEA ES LA MAGIA:
+                // Observa la lista original y se actualiza sola en cuanto cambias un copy()
+                val activos by remember {
+                    derivedStateOf {
+                        viewModel.listaPedidosCocina.filter { it.estado != "ENTREGADO" }
+                    }
+                }
+
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Solo mostramos los que no están ENTREGADOS para no llenar la cocina de basura
-                    val activos = viewModel.listaPedidosCocina.filter { it.estado != "ENTREGADO" }
-
-                    items(activos) { pedido ->
-                        ComandaCard(pedido) {
-                            // Esta función la tienes que crear en el ViewModel para llamar a tu PATCH de Spring
-                            viewModel.avanzarEstado(pedido)
-                        }
+                    // USAR 'activos' (la lista reactiva) y poner una KEY
+                    items(
+                        items = activos,
+                        key = { it.id ?: it.hashCode() } // La KEY es obligatoria para cambios visuales rápidos
+                    ) { pedido ->
+                        ComandaCard(
+                            pedido = pedido,
+                            viewModel = viewModel,
+                            onAccion = { viewModel.avanzarEstado(pedido) }
+                        )
                     }
                 }
             }
@@ -91,13 +104,13 @@ fun PantallaCocina(navController: NavController, viewModel: PedidoViewModel) {
 }
 
 @Composable
-fun ComandaCard(pedido: Pedido, onAccion: () -> Unit) {
-    val colorEstado = when (pedido.estado) {
-        "PENDIENTE" -> Color.Red
-        "COCINANDO" -> Color(0xFFFBC02D) // Amarillo
-        "REPARTO" -> Color(0xFF2196F3)   // Azul
-        "ENTREGADO" -> Color(0xFF4CAF50) // Verde
-        else -> Color.Gray
+fun ComandaCard(pedido: Pedido, viewModel: PedidoViewModel, onAccion: () -> Unit) {
+    val (colorEstado, textoBoton, proximoEstadoNombre) = when (pedido.estado) {
+        "PENDIENTE" -> Triple(Color.Red, "EMPEZAR A COCINAR", "PENDIENTE")
+        "COCINANDO" -> Triple(AmarilloProceso, "PASAR A REPARTO", "EN COCINA")
+        "REPARTO" -> Triple(Color(0xFF2196F3), "MARCAR COMO ENTREGADO", "EN REPARTO")
+        "ENTREGADO" -> Triple(VerdeListo, "FINALIZADO", "ENTREGADO")
+        else -> Triple(Color.Gray, "---", "DESCONOCIDO")
     }
 
     Card(
@@ -127,7 +140,7 @@ fun ComandaCard(pedido: Pedido, onAccion: () -> Unit) {
                     Text(
                         text = pedido.estado,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = if (pedido.estado == "PREPARANDO") Color.Black else Color.White,
+                        color = if (pedido.estado == "COCINANDO") Color.Black else Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
@@ -184,17 +197,24 @@ fun ComandaCard(pedido: Pedido, onAccion: () -> Unit) {
             // BOTÓN DE ACCIÓN
             Button(
                 onClick = onAccion,
+                enabled = viewModel.actualizandoPedidoId.value != pedido.id, // Deshabilitar si se está cargando
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = colorEstado),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                val textoBoton = when (pedido.estado) {
-                    "PENDIENTE" -> "EMPEZAR A COCINAR"
-                    "COCINANDO" -> "PASAR A REPARTO"
-                    "REPARTO" -> "MARCAR COMO ENTREGADO"
-                    else -> "FINALIZAR"
+
+                if (viewModel.actualizandoPedidoId.value == pedido.id) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    val textoBoton = when (pedido.estado) {
+                        "PENDIENTE" -> "EMPEZAR A COCINAR"
+                        "COCINANDO" -> "PASAR A REPARTO"
+                        "REPARTO" -> "MARCAR COMO ENTREGADO"
+                        else -> "FINALIZAR"
+                    }
+                    Text(textoBoton, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = if (pedido.estado == "COCINANDO") Color.Black else Color.White)
                 }
-                Text(textoBoton, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = if (pedido.estado == "PREPARANDO") Color.Black else Color.White)
+
             }
         }
     }

@@ -11,6 +11,8 @@ class PedidoViewModel : ViewModel() {
     private val repository = PedidoRepository()
     var listaPedidosCocina = mutableStateListOf<Pedido>()
 
+    var actualizandoPedidoId = mutableStateOf<String?>(null)
+
     var listaPedidos = mutableStateListOf<Pedido>()
     var cargando by mutableStateOf(false)
 
@@ -58,16 +60,34 @@ class PedidoViewModel : ViewModel() {
         }
 
         if (nuevoEstado != null && pedido.id != null) {
-            viewModelScope.launch {
-                try {
-                    val exito = repository.cambiarEstado(pedido.id, nuevoEstado)
-                    if (exito) {
-                        // Refrescamos la lista si la llamada fue bien
+            // 1. Buscamos el índice
+            val indice = listaPedidosCocina.indexOfFirst { it.id == pedido.id }
+            if (indice != -1) {
+                // --- ACTUALIZACIÓN INSTANTÁNEA ---
+                // Guardamos el estado viejo por si hay error
+                val estadoAnterior = listaPedidosCocina[indice].estado
+
+                // Cambiamos el estado en local YA
+                if (nuevoEstado == "ENTREGADO") {
+                    listaPedidosCocina.removeAt(indice)
+                } else {
+                    listaPedidosCocina[indice] = listaPedidosCocina[indice].copy(estado = nuevoEstado)
+                }
+
+                // 2. Ahora lanzamos la petición al servidor en segundo plano
+                viewModelScope.launch {
+                    try {
+                        actualizandoPedidoId.value = pedido.id
+                        val exito = repository.cambiarEstado(pedido.id, nuevoEstado)
+                        if (!exito) {
+                            // Si falla, podrías recargar o volver atrás, pero normalmente irá bien
+                            cargarTodosLosPedidos()
+                        }
+                    } catch (e: Exception) {
                         cargarTodosLosPedidos()
+                    } finally {
+                        actualizandoPedidoId.value = null
                     }
-                } catch (e: Exception) {
-                    // Si algo falla, que no se cierre la app
-                    println("DEBUG_ILLO: Crash evitado en ViewModel: ${e.message}")
                 }
             }
         }
