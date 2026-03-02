@@ -198,11 +198,11 @@ fun PantallaAdmin(
             // --- PARTE 2: LA LISTA ---
             items(productoViewModel.listaProductos) { producto ->
                 FilaProductoAdmin(producto) {
-                    println("DEBUG_ILLO: El ID del producto '${producto.getNombre()}' es: '${producto.getId()}'")
+                    println("DEBUG_ILLO: El ID del producto '${producto.nombre}' es: '${producto.id}'")
                     productoViewModel.eliminarProducto(
-                        id = producto.getId(),
+                        id = producto.id,
                         onSuccess = {
-                            Toast.makeText(context, "Eliminado: ${producto.getNombre()}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Eliminado: ${producto.nombre}", Toast.LENGTH_SHORT).show()
                         },
                         onError = { mensajeError ->
                             Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show()
@@ -227,9 +227,9 @@ fun FilaProductoAdmin(producto: Producto, onDelete: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = producto.getNombre(), fontWeight = FontWeight.Bold)
-                Text(text = "${producto.getPrecio()}€", color = Color.DarkGray)
-                Text(text = "Cat: ${producto.getCategoria()}", fontSize = 11.sp, color = Color.Gray)
+                Text(text = producto.nombre, fontWeight = FontWeight.Bold)
+                Text(text = "${producto.precio}€", color = Color.DarkGray)
+                Text(text = "Cat: ${producto.categoria}", fontSize = 11.sp, color = Color.Gray)
             }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, "Borrar", tint = Color.Red)

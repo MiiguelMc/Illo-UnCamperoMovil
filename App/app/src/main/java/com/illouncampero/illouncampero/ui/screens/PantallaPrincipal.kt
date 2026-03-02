@@ -148,7 +148,7 @@ fun SeccionInicio(
     // Obtenemos 5 camperos aleatorios y los recordamos para que no cambien en cada click
     val camperosRecomendados = remember(prodViewModel.listaProductos) {
         prodViewModel.listaProductos
-            .filter { it.getCategoria()?.lowercase() == "campero" }
+            .filter { it.categoria?.lowercase() == "campero" }
             .shuffled()
             .take(5)
     }
@@ -193,7 +193,7 @@ fun SeccionInicio(
                         onClick = {
                             // Buscamos el producto en la lista por su nombre
                             val prodOferta = prodViewModel.listaProductos.find {
-                                it.getNombre().contains("Pollo", ignoreCase = true)
+                                it.nombre.contains("Pollo", ignoreCase = true)
                             }
                             if (prodOferta != null) {
                                 carritoViewModel.añadirProducto(prodOferta)
@@ -306,7 +306,7 @@ fun CardCamperoTop(producto: Producto) {
     ) {
         Column {
             AsyncImage(
-                model = producto.getImagenUrl(),
+                model = producto.imagenUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(100.dp),
                 contentScale = ContentScale.Crop,
@@ -314,9 +314,9 @@ fun CardCamperoTop(producto: Producto) {
                 error = painterResource(R.drawable.logo)
             )
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(producto.getNombre(), fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, color = MarronBK)
+                Text(producto.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1, color = MarronBK)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("${producto.getPrecio()}€", fontWeight = FontWeight.Black, color = naranjaIllo, fontSize = 16.sp)
+                    Text("${producto.precio}€", fontWeight = FontWeight.Black, color = naranjaIllo, fontSize = 16.sp)
                     Spacer(Modifier.weight(1f))
                     Icon(Icons.Default.AddCircle, null, tint = RojoBK, modifier = Modifier.size(20.dp))
                 }
@@ -379,11 +379,11 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
                 val productosFiltradosYAgrupados = remember(prodViewModel.listaProductos, catActual) {
                     prodViewModel.listaProductos
                         .filter {
-                            val categoriaEnDB = it.getCategoria() ?: "" // Si es null, usa texto vacío
+                            val categoriaEnDB = it.categoria ?: "" // Si es null, usa texto vacío
                             categoriaEnDB.trim().lowercase() == catActual.lowercase()
                         }
                         .groupBy {
-                            val subcatEnDB = it.getSubcategoria() ?: "Varios" // Si es null, usa "Varios"
+                            val subcatEnDB = it.subcategoria ?: "Varios" // Si es null, usa "Varios"
                             subcatEnDB.trim()
                         }
                 }
@@ -427,7 +427,7 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
     ) {
         Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = producto.getImagenUrl() ?: "",
+                model = producto.imagenUrl ?: "",
                 contentDescription = null,
                 modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
@@ -436,9 +436,9 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(producto.getNombre() ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MarronBK)
-                Text(producto.getDescripcion() ?: "", fontSize = 12.sp, color = Color.Gray, maxLines = 2)
-                Text("${producto.getPrecio()}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 18.sp)
+                Text(producto.nombre ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MarronBK)
+                Text(producto.descripcion ?: "", fontSize = 12.sp, color = Color.Gray, maxLines = 2)
+                Text("${producto.precio}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 18.sp)
             }
             Surface(onClick = onAdd, shape = CircleShape, color = naranjaIllo, modifier = Modifier.size(36.dp)) {
                 Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.padding(8.dp))
@@ -462,8 +462,8 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(carritoViewModel.items) { item ->
                     ListItem(
-                        headlineContent = { Text(item.producto.getNombre(), fontWeight = FontWeight.Bold) },
-                        supportingContent = { Text("${item.producto.getPrecio()}€ x ${item.cantidad}") },
+                        headlineContent = { Text(item.producto.nombre, fontWeight = FontWeight.Bold) },
+                        supportingContent = { Text("${item.producto.precio}€ x ${item.cantidad}") },
                         trailingContent = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 IconButton(onClick = { carritoViewModel.quitarProducto(item.producto) }) { Icon(Icons.Default.RemoveCircleOutline, null, tint = RojoBK) }

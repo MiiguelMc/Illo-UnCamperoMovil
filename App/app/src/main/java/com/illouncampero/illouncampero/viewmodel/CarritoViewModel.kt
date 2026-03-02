@@ -22,7 +22,7 @@ class CarritoViewModel : ViewModel() {
     private val api = RetrofitClient.instancia
 
     fun añadirProducto(producto: Producto) {
-        val itemExistente = items.find { it.producto.getId() == producto.getId() }
+        val itemExistente = items.find { it.producto.id == producto.id }
         if (itemExistente != null) {
             val index = items.indexOf(itemExistente)
             items[index] = itemExistente.copy(cantidad = itemExistente.cantidad + 1)
@@ -32,7 +32,7 @@ class CarritoViewModel : ViewModel() {
     }
 
     fun quitarProducto(producto: Producto) {
-        val itemExistente = items.find { it.producto.getId() == producto.getId() }
+        val itemExistente = items.find { it.producto.id == producto.id }
         if (itemExistente != null) {
             if (itemExistente.cantidad > 1) {
                 val index = items.indexOf(itemExistente)
@@ -55,7 +55,7 @@ class CarritoViewModel : ViewModel() {
                     notasGenerales = notasInput,
                     total = calcularTotal(),
                     productos = items.map {
-                        DetallePedido(it.producto.getId(), it.producto.getNombre(), it.cantidad, it.producto.getPrecio())
+                        DetallePedido(it.producto.id, it.producto.nombre, it.cantidad, it.producto.precio)
                     }
                 )
                 val response = api.realizarPedido(token, nuevoPedido)
@@ -69,7 +69,7 @@ class CarritoViewModel : ViewModel() {
         }
     }
 
-    fun calcularTotal() = items.sumOf { it.producto.getPrecio() * it.cantidad }
+    fun calcularTotal() = items.sumOf { it.producto.precio * it.cantidad }
     fun contadorTotal() = items.sumOf { it.cantidad }
     fun vaciarCarrito() = items.clear()
 }

@@ -26,15 +26,23 @@ class ProductoViewModel : ViewModel() {
     var imagenUrlInput by mutableStateOf("")
     var disponibleInput by mutableStateOf(true)
 
+    init {
+        cargarProductos() // Carga automática al iniciar
+    }
+
     fun cargarProductos() {
         viewModelScope.launch {
             cargando = true
+            mensajeError = null // Limpiamos errores previos
             try {
                 val res = repository.obtenerCarta()
                 listaProductos.clear()
-                listaProductos.addAll(res ?: emptyList())
+                if (res != null) {
+                    listaProductos.addAll(res)
+                }
             } catch (e: Exception) {
-                mensajeError = "Error al cargar: ${e.localizedMessage}"
+                mensajeError = "Error: ${e.localizedMessage}. ¿Está el servidor encendido?"
+                e.printStackTrace()
             } finally {
                 cargando = false
             }
@@ -96,7 +104,7 @@ class ProductoViewModel : ViewModel() {
 
                 // 2. Si la llamada al repositorio no lanzó excepción, borramos de la lista local
                 // Usamos removeAll para asegurar que Compose detecte el cambio en el mutableStateListOf
-                val eliminado = listaProductos.removeAll { it.getId() == id }
+                val eliminado = listaProductos.removeAll { it.id == id }
 
                 if (eliminado) {
                     onSuccess()
