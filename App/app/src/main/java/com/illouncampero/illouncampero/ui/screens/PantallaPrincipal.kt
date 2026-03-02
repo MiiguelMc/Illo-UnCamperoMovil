@@ -145,6 +145,8 @@ fun SeccionInicio(
     carritoViewModel: CarritoViewModel,
     onVerCarta: (String) -> Unit // Ahora recibe la categoría para filtrar
 ) {
+
+    val context = LocalContext.current
     // Obtenemos 5 camperos aleatorios y los recordamos para que no cambien en cada click
     val camperosRecomendados = remember(prodViewModel.listaProductos) {
         prodViewModel.listaProductos
@@ -191,14 +193,22 @@ fun SeccionInicio(
                     // BOTÓN PARA AÑADIR AL CARRITO
                     Button(
                         onClick = {
-                            // Buscamos el producto en la lista por su nombre
-                            val prodOferta = prodViewModel.listaProductos.find {
-                                it.nombre.contains("Pollo", ignoreCase = true)
-                            }
-                            if (prodOferta != null) {
-                                carritoViewModel.añadirProducto(prodOferta)
-                                // Opcional: Toast de éxito
-                            }
+                            // Creamos un objeto "virtual" que representa el pack
+                            // Así nos aseguramos de que el precio sea EXACTAMENTE 6.50€
+                            val packOferta = Producto(
+                                id = "OFERTA_POLLO_PACK", // ID inventado para que no choque con otros
+                                nombre = "Pack: Campero Pollo + Patatas",
+                                precio = 6.50, // Precio de la oferta
+                                imagenUrl = "https://tu-url-de-imagen-o-logo.png", // Puedes poner la del campero de pollo
+                                categoria = "oferta",
+                                descripcion = "Oferta especial del día: Campero completo de pollo y ración de patatas"
+                            )
+
+                            // Lo añadimos al carrito
+                            carritoViewModel.añadirProducto(packOferta)
+
+                            // Feedback para el usuario
+                            Toast.makeText(context, "¡Oferta añadida al carrito!", Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
                         shape = RoundedCornerShape(8.dp),
@@ -261,7 +271,14 @@ fun SeccionInicio(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(camperosRecomendados) { producto ->
-                    CardCamperoTop(producto)
+                    CardCamperoTop(
+                        producto = producto,
+                        onAdd = {
+                            carritoViewModel.añadirProducto(producto)
+                            // Opcional: añade un println para ver en la consola si entra
+                            println("Añadiendo producto: ${producto.nombre}")
+                        }
+                    )
                 }
             }
         }
@@ -297,7 +314,7 @@ fun ItemCategoriaCirculo(label: String, icon: androidx.compose.ui.graphics.vecto
 }
 
 @Composable
-fun CardCamperoTop(producto: Producto) {
+fun CardCamperoTop(producto: Producto, onAdd: () -> Unit) { // 1. Añadimos el parámetro onAdd
     Card(
         modifier = Modifier.width(160.dp),
         shape = RoundedCornerShape(16.dp),
@@ -318,7 +335,19 @@ fun CardCamperoTop(producto: Producto) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("${producto.precio}€", fontWeight = FontWeight.Black, color = naranjaIllo, fontSize = 16.sp)
                     Spacer(Modifier.weight(1f))
-                    Icon(Icons.Default.AddCircle, null, tint = RojoBK, modifier = Modifier.size(20.dp))
+
+                    // 2. CAMBIO AQUÍ: Envolvemos el icono en un IconButton
+                    IconButton(
+                        onClick = onAdd, // <--- Ejecutamos la acción de añadir
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.AddCircle,
+                            null,
+                            tint = RojoBK,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
@@ -418,6 +447,7 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
     }
 }
 @Composable
+// Este es tu código tal cual, solo asegúrate de que onAdd se ejecute al pulsar
 fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(16.dp, 8.dp),
@@ -427,7 +457,7 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
     ) {
         Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = producto.imagenUrl ?: "",
+                model = producto.imagenUrl,
                 contentDescription = null,
                 modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
@@ -436,11 +466,17 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(producto.nombre ?: "", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MarronBK)
-                Text(producto.descripcion ?: "", fontSize = 12.sp, color = Color.Gray, maxLines = 2)
+                Text(producto.nombre, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = MarronBK)
+                Text(producto.descripcion, fontSize = 12.sp, color = Color.Gray, maxLines = 2)
                 Text("${producto.precio}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 18.sp)
             }
-            Surface(onClick = onAdd, shape = CircleShape, color = naranjaIllo, modifier = Modifier.size(36.dp)) {
+            // AQUÍ ES DONDE SE EJECUTA EL onAdd QUE PASAMOS
+            Surface(
+                onClick = onAdd,
+                shape = CircleShape,
+                color = naranjaIllo,
+                modifier = Modifier.size(36.dp)
+            ) {
                 Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.padding(8.dp))
             }
         }

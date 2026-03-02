@@ -25,8 +25,10 @@ class CarritoViewModel : ViewModel() {
         val itemExistente = items.find { it.producto.id == producto.id }
         if (itemExistente != null) {
             val index = items.indexOf(itemExistente)
+            // Actualizamos la posición con una copia y nueva cantidad
             items[index] = itemExistente.copy(cantidad = itemExistente.cantidad + 1)
         } else {
+            // Si no existe, lo añadimos nuevo
             items.add(ItemCarrito(producto, 1))
         }
     }
