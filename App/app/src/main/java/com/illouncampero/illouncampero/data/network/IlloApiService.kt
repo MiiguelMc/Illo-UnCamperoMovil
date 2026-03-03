@@ -76,6 +76,7 @@ interface IlloApiService {
     // ← MOVIDO aquí, fuera del companion object y con la ruta correcta bajo /api/
     @PATCH("api/usuarios/{uid}/fcm-token")
     suspend fun actualizarFcmToken(
+        @Header("Authorization") token: String,
         @Path("uid") uid: String,
         @Body body: Map<String, String>
     ): Response<Void>

@@ -1,9 +1,14 @@
 package com.illouncampero.illouncampero
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,10 +27,30 @@ import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
 import com.illouncampero.illouncampero.viewmodel.UsuarioViewModel
 
 class MainActivity : ComponentActivity() {
+
+    // Launcher para pedir el permiso de notificaciones (Android 13+)
+    private val permisosNotificacion = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            println("DEBUG_ILLO: Permiso de notificaciones concedido")
+        } else {
+            println("DEBUG_ILLO: Permiso de notificaciones denegado")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Creamos el ViewModel aquí para que sea el mismo en toda la app
+        // Pedimos el permiso solo en Android 13 (API 33) o superior
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                permisosNotificacion.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
         val authViewModel = AuthViewModel()
         val productosViewModel = ProductoViewModel()
         val usuarioViewModel = UsuarioViewModel()
@@ -40,7 +65,7 @@ class MainActivity : ComponentActivity() {
                     composable("splash") { PantallaSplash(navController, authViewModel) }
                     composable("login") { PantallaLogin(navController, authViewModel) }
                     composable("registro") { PantallaRegistro(navController, authViewModel) }
-                    composable("home") {    PantallaPrincipal(navController, authViewModel, productosViewModel, carritoViewModel,usuarioViewModel)} // <--- PASALO AQUÍ
+                    composable("home") { PantallaPrincipal(navController, authViewModel, productosViewModel, carritoViewModel, usuarioViewModel) }
                     composable("admin_panel") { PantallaAdmin(navController, authViewModel, productosViewModel) }
                     composable("configuracion") {
                         com.illouncampero.illouncampero.ui.screens.PantallaConfiguracion(navController = navController, viewModel = usuarioViewModel)
@@ -53,4 +78,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

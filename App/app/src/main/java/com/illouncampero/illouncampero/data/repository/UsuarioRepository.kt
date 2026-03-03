@@ -80,9 +80,17 @@ class UsuarioRepository {
     }
 
 
-    suspend fun actualizarFcmToken(uid: String, token: String) {
+    suspend fun actualizarFcmToken(uid: String, fcmToken: String) {
         try {
-            RetrofitClient.instancia.actualizarFcmToken(uid, mapOf("fcmToken" to token))
+            // Obtenemos el token de Firebase igual que en el resto de llamadas autenticadas
+            val authToken = obtenerToken()
+
+            val response = RetrofitClient.instancia.actualizarFcmToken(authToken, uid, mapOf("fcmToken" to fcmToken))
+            if (response.isSuccessful) {
+                println("DEBUG_ILLO: FCM token guardado en backend correctamente. Código: ${response.code()}")
+            } else {
+                println("DEBUG_ILLO: Backend rechazó el FCM token. Código: ${response.code()} - ${response.errorBody()?.string()}")
+            }
         } catch (e: Exception) {
             println("DEBUG_ILLO: No se pudo guardar el FCM token: ${e.message}")
         }
