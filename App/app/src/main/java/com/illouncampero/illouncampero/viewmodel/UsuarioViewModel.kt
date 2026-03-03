@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging          // ← AÑADIDO
 import com.illouncampero.illouncampero.data.repository.UsuarioRepository
 import kotlinx.coroutines.launch
 
@@ -28,7 +29,6 @@ class UsuarioViewModel : ViewModel() {
 
         viewModelScope.launch {
             cargando = true
-            // Ahora esto funcionará porque el repository devuelve un Usuario?
             val perfil = repository.obtenerPerfilDirecto(uid)
 
             if (perfil != null) {
@@ -36,9 +36,36 @@ class UsuarioViewModel : ViewModel() {
                 telefono = perfil.telefono
                 direccion = perfil.direccion ?: ""
                 println("DEBUG_ILLO: Perfil cargado correctamente")
+
+                // ← AÑADIDO: Registrar/renovar el token FCM después de cargar el perfil
+                registrarFcmToken(uid)
             }
             cargando = false
         }
+    }
+
+    /**
+     * Obtiene el token FCM del dispositivo actual y lo guarda en el backend.
+     * Se llama automáticamente al cargar el perfil (es decir, cuando el usuario está logueado).
+     * FCM puede renovar el token en cualquier momento, por eso lo refrescamos en cada sesión.
+     */
+    private fun registrarFcmToken(uid: String) {
+        FirebaseMessaging.getInstance().token
+            .addOnSuccessListener { token ->
+                println("DEBUG_ILLO: FCM Token obtenido, enviando al backend...")
+                viewModelScope.launch {
+                    try {
+                        repository.actualizarFcmToken(uid, token)
+                        println("DEBUG_ILLO: FCM Token guardado correctamente")
+                    } catch (e: Exception) {
+                        // No mostramos error al usuario, no es crítico para la UX
+                        println("DEBUG_ILLO: Error al guardar FCM token: ${e.message}")
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                println("DEBUG_ILLO: Error al obtener FCM token: ${e.message}")
+            }
     }
 
     fun guardarCambios(onSuccess: () -> Unit) {

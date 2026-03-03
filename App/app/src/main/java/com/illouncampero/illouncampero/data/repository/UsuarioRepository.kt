@@ -3,6 +3,7 @@ package com.illouncampero.illouncampero.data.repository
 import Usuario
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.illouncampero.illouncampero.data.network.IlloApiService
 import com.illouncampero.illouncampero.data.network.RetrofitClient
 import kotlinx.coroutines.tasks.await
 
@@ -76,6 +77,15 @@ class UsuarioRepository {
         val token = obtenerToken()
         // Asegúrate de tener este endpoint en tu SpringBoot (PUT)
         api.updatePerfil(token, usuario)
+    }
+
+
+    suspend fun actualizarFcmToken(uid: String, token: String) {
+        try {
+            RetrofitClient.instancia.actualizarFcmToken(uid, mapOf("fcmToken" to token))
+        } catch (e: Exception) {
+            println("DEBUG_ILLO: No se pudo guardar el FCM token: ${e.message}")
+        }
     }
 
     fun getCurrentUid(): String? = auth.currentUser?.uid

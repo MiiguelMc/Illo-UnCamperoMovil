@@ -7,22 +7,14 @@ plugins {
 
 android {
     namespace = "com.illouncampero.illouncampero"
-    // Baja el compileSdk al 34 o 35 (el 36 es experimental y da problemas)
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.illouncampero.illouncampero"
-
-        // ESTA ES LA LÍNEA CLAVE:
-        // Cámbialo a 24 o 26. Esto hará que funcione en el 99% de los móviles.
         minSdk = 26
-
-        // El target debe coincidir con el compileSdk
         targetSdk = 35
-
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -49,15 +41,16 @@ android {
 
 dependencies {
 
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
 
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")      // Para el Login
-    implementation("com.google.firebase:firebase-firestore") // Para los Camperos
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-messaging-ktx") // FCM
+
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.navigation:navigation-compose:2.8.5")
-
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation(libs.androidx.core.ktx)
@@ -81,14 +74,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    // Las herramientas para hablar con Spring Boot
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-    // Esta es la que trae los iconos
     implementation("androidx.compose.material:material-icons-extended")
-
-    // Y asegúrate de tener la de Material 3 que es la que estamos usando
     implementation("androidx.compose.material3:material3")
-
 }
