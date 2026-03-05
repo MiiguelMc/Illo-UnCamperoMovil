@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Illo Un Campero</string>
+
+    <!-- PantallaLogin -->
+    <string name="login_bienvenida">Hey there, mate!</string>
+    <string name="login_subtitulo">Log in to order your favourite campero</string>
+    <string name="login_email">Email Address</string>
+    <string name="login_contrasena">Password</string>
+    <string name="login_olvide_clave">Forgot your password?</string>
+    <string name="login_boton">LOG IN!</string>
+    <string name="login_sin_cuenta">I DON\'T HAVE AN ACCOUNT YET</string>
+    <string name="login_error_campos">Please fill in all fields</string>
+    <string name="login_logo_desc">Illo Un Campero Logo</string>
+
+    <!-- PantallaRegistro -->
+    <string name="registro_titulo">Join the family! 🍔</string>
+    <string name="registro_subtitulo">Create your account to start ordering</string>
+    <string name="registro_nombre">First Name</string>
+    <string name="registro_apellidos">Last Name</string>
+    <string name="registro_telefono">Phone</string>
+    <string name="registro_email">Email</string>
+    <string name="registro_contrasena">Password</string>
+    <string name="registro_confirmar">Confirm Password</string>
+    <string name="registro_boton">LET\'S GO 🚀</string>
+    <string name="registro_ya_tengo_cuenta">I already have an account, go back to login</string>
+    <string name="registro_error_campos">Please fill in the required fields.</string>
+    <string name="registro_error_contrasenas">Passwords do not match.</string>
+    <string name="registro_exito">Account created! Welcome to the family.</string>
+    <string name="registro_dialogo_exito">Success!</string>
+    <string name="registro_dialogo_atencion">Attention</string>
+    <string name="registro_dialogo_ok">OK</string>
+
+    <!-- PantallaAdmin -->
+    <string name="admin_titulo">Admin Panel - Illo</string>
+    <string name="admin_gestion_cocina">KITCHEN MANAGEMENT</string>
+    <string name="admin_gestion_producto">Product Management</string>
+    <string name="admin_nombre_campero">Product Name</string>
+    <string name="admin_precio">Price (€)</string>
+    <string name="admin_categoria">Category</string>
+    <string name="admin_categoria_placeholder">e.g. Camperos</string>
+    <string name="admin_subcategoria">Subcategory</string>
+    <string name="admin_subcategoria_placeholder">e.g. Chicken</string>
+    <string name="admin_descripcion">Description</string>
+    <string name="admin_imagen_url">Image URL</string>
+    <string name="admin_disponible">Available on menu</string>
+    <string name="admin_subir_producto">UPLOAD PRODUCT</string>
+    <string name="admin_productos_actuales">Current products</string>
+    <string name="admin_sin_productos">No products on the menu</string>
+    <string name="admin_producto_guardado">Product saved!</string>
+    <string name="admin_eliminado">Deleted: %1$s</string>
+    <string name="admin_cat_label">Cat: %1$s</string>
+
+    <!-- PantallaCocina -->
+    <string name="cocina_titulo">KITCHEN MANAGEMENT 👨‍🍳</string>
+    <string name="cocina_atras">Back</string>
+    <string name="cocina_refrescar">Refresh</string>
+    <string name="cocina_sin_comandas">No active orders</string>
+    <string name="cocina_orden">ORDER #%1$s</string>
+    <string name="cocina_cliente">Customer: %1$s</string>
+    <string name="cocina_nota">👉 NOTE: %1$s</string>
+    <string name="cocina_notas_envio">DELIVERY NOTES: %1$s</string>
+    <string name="cocina_empezar">START COOKING</string>
+    <string name="cocina_pasar_reparto">SEND TO DELIVERY</string>
+    <string name="cocina_marcar_entregado">MARK AS DELIVERED</string>
+    <string name="cocina_finalizar">FINISH</string>
+
+    <!-- PantallaConfiguracion -->
+    <string name="config_titulo">My Profile</string>
+    <string name="config_atras">Back</string>
+    <string name="config_mis_datos">My Current Details</string>
+    <string name="config_nombre">Full Name</string>
+    <string name="config_email">Email (Not editable)</string>
+    <string name="config_telefono">Contact phone</string>
+    <string name="config_direccion">Delivery address</string>
+    <string name="config_guardar">SAVE CHANGES</string>
+    <string name="config_perfil_actualizado">Profile updated!</string>
+    <string name="config_seguridad">Security</string>
+    <string name="config_cambiar_contrasena">Send email to change password</string>
+    <string name="config_volver">BACK TO MENU</string>
+
+    <!-- PantallaMisPedidos -->
+    <string name="pedidos_titulo">My Orders</string>
+    <string name="pedidos_atras">Back</string>
+    <string name="pedidos_sin_pedidos">You haven\'t placed any orders yet</string>
+    <string name="pedidos_numero">Order #%1$s</string>
+    <string name="pedidos_total">Total: %1$s€</string>
+    <string name="pedidos_ver_detalles">View details</string>
+
+    <!-- PantallaDetallePedido -->
+    <string name="detalle_titulo">Order Detail</string>
+    <string name="detalle_resumen">Product summary</string>
+    <string name="detalle_total">TOTAL:</string>
+    <string name="detalle_info_entrega">Delivery Information</string>
+    <string name="detalle_cliente">Customer: %1$s</string>
+    <string name="detalle_direccion">Address: %1$s</string>
+    <string name="detalle_telefono">Phone: %1$s</string>
+    <string name="detalle_estado">Current status: %1$s</string>
+
+    <!-- PantallaPrincipal -->
+    <string name="principal_hola">Hey, %1$s! 👋</string>
+    <string name="principal_oferta_dia">DEAL OF THE DAY</string>
+    <string name="principal_oferta_nombre">Chicken Campero\n+ Fries</string>
+    <string name="principal_oferta_precio">Only €6.50</string>
+    <string name="principal_oferta_añadir">ADD</string>
+    <string name="principal_oferta_añadida">Deal added to cart!</string>
+    <string name="principal_pide_ahora">ORDER YOUR CAMPERO NOW</string>
+    <string name="principal_que_apetece">What do you fancy today?</string>
+    <string name="principal_mas_vendidos">Best sellers in Málaga 🔥</string>
+    <string name="principal_abierto">Open until 3:00 AM</string>
+    <string name="principal_nombre_negocio">Illo, Un campero</string>
+    <string name="principal_slogan">The best camperos in Málaga</string>
+    <string name="principal_cat_campero">Campero</string>
+    <string name="principal_cat_entrantes">Starters</string>
+    <string name="principal_cat_bebidas">Drinks</string>
+    <string name="principal_inicio">Home</string>
+    <string name="principal_carta">Menu</string>
+    <string name="principal_pedir">Order</string>
+    <string name="carta_campero">Food</string>
+    <string name="carta_entrantes">Starters</string>
+    <string name="carta_postres">Desserts</string>
+    <string name="carta_bebidas">Drinks</string>
+
+    <!-- Carrito / Cesta -->
+    <string name="cesta_titulo">Your Order</string>
+    <string name="cesta_vacia">Empty cart</string>
+    <string name="cesta_notas">Notes for the restaurant</string>
+    <string name="cesta_efectivo">Cash</string>
+    <string name="cesta_tarjeta">Card</string>
+    <string name="cesta_total">Total:</string>
+    <string name="cesta_realizar_pedido">PLACE ORDER</string>
+    <string name="cesta_pedido_enviado">Order placed!</string>
+    <string name="cesta_rellena_perfil">Please fill in your details in \'My Profile\' before ordering</string>
+    <string name="cesta_pago_seguro">Secure Payment</string>
+    <string name="cesta_num_tarjeta">Card Number</string>
+    <string name="cesta_exp">Exp</string>
+    <string name="cesta_cvv">CVV</string>
+    <string name="cesta_pagar">Pay Now</string>
+    <string name="cesta_pago_realizado">Payment completed</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_hola">Hey, %1$s!</string>
+    <string name="menu_perfil">My Profile</string>
+    <string name="menu_pedidos">My Orders</string>
+    <string name="menu_cerrar_sesion">Log Out</string>
+
+    <!-- Splash -->
+    <string name="splash_logo_desc">Illo Logo</string>
+
+    <!-- Varios -->
+    <string name="sin_productos_categoria">No products in %1$s</string>
+    <string name="varios">OTHERS</string>
+</resources>
