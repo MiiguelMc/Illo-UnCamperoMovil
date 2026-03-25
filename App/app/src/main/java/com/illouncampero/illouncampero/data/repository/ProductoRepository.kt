@@ -35,4 +35,16 @@ class ProductoRepository {
             throw Exception("No se pudo eliminar: ${respuesta.code()}")
         }
     }
+
+    // En data/repository/ProductoRepository.kt
+    suspend fun actualizarProducto(producto: Producto): Boolean {
+        return try {
+            val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val token = user?.getIdToken(false)?.await()?.token
+            val response = api.actualizarProducto("Bearer $token", producto.id, producto)
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

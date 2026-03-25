@@ -81,5 +81,13 @@ interface IlloApiService {
         @Body body: Map<String, String>
     ): Response<Void>
 
+    // En data/network/IlloApiService.kt
+    @PUT("api/productos/{id}")
+    suspend fun actualizarProducto(
+        @Header("Authorization") token: String,
+        @Path("id") id: String,
+        @Body producto: Producto
+    ): Response<Unit>
+
     companion object  // companion object vacío — está bien así
 }
