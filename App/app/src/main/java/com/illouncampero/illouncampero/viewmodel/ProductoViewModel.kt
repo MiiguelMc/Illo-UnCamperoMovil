@@ -12,6 +12,13 @@ class ProductoViewModel : ViewModel() {
 
     // --- ESTADOS DE LA LISTA ---
     var listaProductos = mutableStateListOf<Producto>()
+    val listaOfertas: List<Producto>
+        get() = listaProductos.filter { it.categoria?.lowercase() == "oferta" }.take(5)
+
+    // Oferta destacada para el banner principal (la primera)
+    val packDelDia: Producto?
+        get() = listaProductos.find { it.categoria?.trim()?.lowercase() == "pack" }
+
     var cargando by mutableStateOf(false)
     var mensajeError by mutableStateOf<String?>(null)
 

@@ -47,31 +47,17 @@ val CremaBK     = Color(0xFFF5EBDC)
 val RojoBK      = Color(0xFFD62300)
 val naranjaIllo = Color(0xFFF39200)
 
-// Datos para el carrusel de promociones hardcodeado
-data class PromoCard(
-    val titulo: String,
-    val subtitulo: String,
-    val precio: Double,
-    val emoji: String,
-    val gradiente: List<Color>
-) {
-    fun toProducto() = Producto(
-        id = "PROMO_${titulo.uppercase().replace(" ", "_")}", // Sin la barra invertida \
-        nombre = titulo,
-        precio = precio,
-        imagenUrl = "",
-        categoria = "oferta",
-        descripcion = subtitulo
-    )
-}
-
-val PROMOS = listOf(
-    PromoCard("Campero Especial", "El clásico de siempre", 9.00, "🏆", listOf(Color(0xFF2D1406), Color(0xFF5C2A0E))),
-    PromoCard("Combo Familiar", "2 camperos + 2 patatas", 11.00, "👨‍👩‍👧", listOf(Color(0xFF1A3A1A), Color(0xFF2E7D32))),
-    PromoCard("Menú Estudiante", "Campero + refresco", 7.00, "🎓", listOf(Color(0xFF1A237E), Color(0xFF303F9F))),
-    PromoCard("Campero Vegetal", "Para los más sanos", 5.90, "🥗", listOf(Color(0xFF33691E), Color(0xFF558B2F))),
+// Gradientes para las cards de promo (se asignan por hash del id, siempre consistentes)
+private val gradientesPromo = listOf(
+    listOf(Color(0xFF2D1406), Color(0xFF5C2A0E)),
+    listOf(Color(0xFF1A3A1A), Color(0xFF2E7D32)),
+    listOf(Color(0xFF1A237E), Color(0xFF303F9F)),
+    listOf(Color(0xFF33691E), Color(0xFF558B2F)),
 )
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PANTALLA PRINCIPAL
+// ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaPrincipal(
@@ -113,7 +99,11 @@ fun PantallaPrincipal(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
-                        Image(painter = painterResource(id = R.drawable.logo_circular), contentDescription = null, modifier = Modifier.height(52.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.logo_circular),
+                            contentDescription = null,
+                            modifier = Modifier.height(52.dp)
+                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -126,7 +116,10 @@ fun PantallaPrincipal(
                                 Icon(Icons.Default.ShoppingCart, null, tint = MarronBK, modifier = Modifier.size(26.dp))
                             }
                             if (cantidadEnCarrito > 0) {
-                                Badge(containerColor = RojoBK, modifier = Modifier.align(Alignment.TopEnd).offset(x = (-4).dp, y = 4.dp)) {
+                                Badge(
+                                    containerColor = RojoBK,
+                                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (-4).dp, y = 4.dp)
+                                ) {
                                     Text("$cantidadEnCarrito", color = Color.White, fontSize = 10.sp)
                                 }
                             }
@@ -138,26 +131,38 @@ fun PantallaPrincipal(
             },
             bottomBar = {
                 NavigationBar(containerColor = Color.White, tonalElevation = 0.dp, modifier = Modifier.shadow(8.dp)) {
-                    listOf(tabInicio to Icons.Default.Home, tabCarta to Icons.Default.List, tabPedir to Icons.Default.ShoppingCart)
-                        .forEachIndexed { index, item ->
-                            NavigationBarItem(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                label = { Text(item.first, fontSize = 11.sp, fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal) },
-                                icon = { Icon(item.second, null, modifier = Modifier.size(22.dp)) },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = naranjaIllo, selectedTextColor = naranjaIllo,
-                                    unselectedIconColor = Color(0xFFAAAAAA), unselectedTextColor = Color(0xFFAAAAAA),
-                                    indicatorColor = Color(0xFFFFF3E0)
+                    listOf(
+                        tabInicio to Icons.Default.Home,
+                        tabCarta  to Icons.Default.List,
+                        tabPedir  to Icons.Default.ShoppingCart
+                    ).forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            label = {
+                                Text(
+                                    item.first,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
                                 )
+                            },
+                            icon = { Icon(item.second, null, modifier = Modifier.size(22.dp)) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = naranjaIllo, selectedTextColor = naranjaIllo,
+                                unselectedIconColor = Color(0xFFAAAAAA), unselectedTextColor = Color(0xFFAAAAAA),
+                                indicatorColor = Color(0xFFFFF3E0)
                             )
-                        }
+                        )
+                    }
                 }
             }
         ) { paddingValues ->
             Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                 when (selectedTab) {
-                    0 -> SeccionInicio(nombre, prodViewModel, carritoViewModel) { cat -> categoriaPreseleccionada = cat; selectedTab = 1 }
+                    0 -> SeccionInicio(nombre, prodViewModel, carritoViewModel) { cat ->
+                        categoriaPreseleccionada = cat
+                        selectedTab = 1
+                    }
                     1 -> SeccionCarta(prodViewModel, carritoViewModel, categoriaPreseleccionada)
                     2 -> SeccionCesta(carritoViewModel, usuarioViewModel)
                 }
@@ -170,20 +175,31 @@ fun PantallaPrincipal(
 // SECCIÓN INICIO
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-fun SeccionInicio(nombre: String, prodViewModel: ProductoViewModel, carritoViewModel: CarritoViewModel, onVerCarta: (String) -> Unit) {
-    val context = LocalContext.current
+fun SeccionInicio(
+    nombre: String,
+    prodViewModel: ProductoViewModel,
+    carritoViewModel: CarritoViewModel,
+    onVerCarta: (String) -> Unit
+) {
+    val camperos  = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "campero"   }.shuffled().take(6) }
+    val entrantes = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "entrantes" }.shuffled().take(5) }
+    val bebidas   = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "bebidas"   }.shuffled().take(5) }
 
-    val camperos   = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "campero" }.shuffled().take(6) }
-    val entrantes  = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "entrantes" }.shuffled().take(5) }
-    val bebidas    = remember(prodViewModel.listaProductos) { prodViewModel.listaProductos.filter { it.categoria?.lowercase() == "bebidas" }.shuffled().take(5) }
+    // ✅ Ofertas desde la BD (ya no hardcodeadas)
+    val ofertas         = prodViewModel.listaOfertas
+    val ofertaDestacada = prodViewModel.packDelDia
 
-    val holaTexto     = stringResource(R.string.principal_hola, nombre.ifBlank { "Illo" })
-    val ofertaAñadida = stringResource(R.string.principal_oferta_añadida)
-    val catCampero    = stringResource(R.string.principal_cat_campero)
-    val catEntrantes  = stringResource(R.string.principal_cat_entrantes)
-    val catBebidas    = stringResource(R.string.principal_cat_bebidas)
+    val holaTexto    = stringResource(R.string.principal_hola, nombre.ifBlank { "Illo" })
+    val catCampero   = stringResource(R.string.principal_cat_campero)
+    val catEntrantes = stringResource(R.string.principal_cat_entrantes)
+    val catBebidas   = stringResource(R.string.principal_cat_bebidas)
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).background(CremaBK)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(CremaBK)
+    ) {
 
         // ── SALUDO ────────────────────────────────────────────────────────────
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
@@ -191,40 +207,8 @@ fun SeccionInicio(nombre: String, prodViewModel: ProductoViewModel, carritoViewM
             Text("¿Qué vas a pedir hoy?", fontSize = 13.sp, color = Color(0xFF9A7A5A))
         }
 
-        // ── BANNER OFERTA DÍA ─────────────────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Brush.linearGradient(listOf(Color(0xFFB71C1C), RojoBK, Color(0xFFE53935))))
-                .height(175.dp)
-        ) {
-            Box(modifier = Modifier.size(180.dp).align(Alignment.CenterEnd).offset(x = 55.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.05f)))
-            Box(modifier = Modifier.size(90.dp).align(Alignment.BottomEnd).offset(x = (-12).dp, y = 36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.07f)))
-            Column(modifier = Modifier.align(Alignment.CenterStart).padding(20.dp)) {
-                Surface(shape = RoundedCornerShape(4.dp), color = Color.White.copy(alpha = 0.2f), modifier = Modifier.padding(bottom = 8.dp)) {
-                    Text(stringResource(R.string.principal_oferta_dia), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
-                }
-                Text(stringResource(R.string.principal_oferta_nombre), color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp, lineHeight = 24.sp)
-                Text(stringResource(R.string.principal_oferta_precio), color = Color(0xFFFFE082), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, modifier = Modifier.padding(top = 4.dp, bottom = 12.dp))
-                Button(
-                    onClick = {
-                        carritoViewModel.añadirProducto(Producto(id = "OFERTA_POLLO_PACK", nombre = "Pack: Campero Pollo + Patatas", precio = 6.50, imagenUrl = "", categoria = "oferta", descripcion = "Oferta especial del día"))
-                        Toast.makeText(context, ofertaAñadida, Toast.LENGTH_SHORT).show()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    elevation = ButtonDefaults.buttonElevation(4.dp)
-                ) {
-                    Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.principal_oferta_añadir), fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-            }
-            Icon(Icons.Default.Star, null, modifier = Modifier.size(80.dp).align(Alignment.CenterEnd).padding(end = 20.dp), tint = Color.White.copy(alpha = 0.1f))
-        }
+        // ── BANNER OFERTA DÍA (dinámico desde BD) ────────────────────────────
+        BannerOfertaDia(ofertaDestacada, carritoViewModel)
 
         Spacer(Modifier.height(14.dp))
 
@@ -236,23 +220,43 @@ fun SeccionInicio(nombre: String, prodViewModel: ProductoViewModel, carritoViewM
             shape = RoundedCornerShape(14.dp),
             elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(stringResource(R.string.principal_pide_ahora), fontWeight = FontWeight.Black, color = Color.White, fontSize = 14.sp, letterSpacing = 0.5.sp)
+            Text(
+                stringResource(R.string.principal_pide_ahora),
+                fontWeight = FontWeight.Black,
+                color = Color.White,
+                fontSize = 14.sp,
+                letterSpacing = 0.5.sp
+            )
         }
 
         Spacer(Modifier.height(24.dp))
 
         // ── CATEGORÍAS RÁPIDAS ────────────────────────────────────────────────
-        Text(stringResource(R.string.principal_que_apetece), fontWeight = FontWeight.Bold, color = MarronBK, fontSize = 15.sp, modifier = Modifier.padding(horizontal = 20.dp))
+        Text(
+            stringResource(R.string.principal_que_apetece),
+            fontWeight = FontWeight.Bold,
+            color = MarronBK,
+            fontSize = 15.sp,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
         Spacer(Modifier.height(14.dp))
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            listOf(catCampero to Icons.Default.Fastfood, catEntrantes to Icons.Default.Icecream, catBebidas to Icons.Default.LocalDrink)
-                .forEach { (label, icon) -> ItemCategoriaCirculo(label, icon) { onVerCarta(label.lowercase()) } }
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            listOf(
+                catCampero   to Icons.Default.Fastfood,
+                catEntrantes to Icons.Default.Icecream,
+                catBebidas   to Icons.Default.LocalDrink
+            ).forEach { (label, icon) ->
+                ItemCategoriaCirculo(label, icon) { onVerCarta(label.lowercase()) }
+            }
         }
 
         Spacer(Modifier.height(28.dp))
 
-        // ── 🔥 CARRUSEL DE PROMOCIONES ────────────────────────────────────────
-        SeccionPromoCards(carritoViewModel)
+        // ── CARRUSEL DE PROMOCIONES (dinámico desde BD) ───────────────────────
+        SeccionPromoCards(ofertas, carritoViewModel)
 
         Spacer(Modifier.height(28.dp))
 
@@ -261,43 +265,40 @@ fun SeccionInicio(nombre: String, prodViewModel: ProductoViewModel, carritoViewM
             SeccionCarrusel(
                 titulo = stringResource(R.string.principal_mas_vendidos),
                 accionLabel = "Ver todos",
-                onAccion = { onVerCarta("campero") },
-                contenido = {
-                    items(camperos) { producto ->
-                        CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
-                    }
+                onAccion = { onVerCarta("campero") }
+            ) {
+                items(camperos) { producto ->
+                    CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
                 }
-            )
+            }
             Spacer(Modifier.height(24.dp))
         }
 
-        // ── 🥗 CARRUSEL ENTRANTES ─────────────────────────────────────────────
+        // ── CARRUSEL ENTRANTES ────────────────────────────────────────────────
         if (entrantes.isNotEmpty()) {
             SeccionCarrusel(
                 titulo = "Para picar 🍟",
                 accionLabel = "Ver entrantes",
-                onAccion = { onVerCarta("entrantes") },
-                contenido = {
-                    items(entrantes) { producto ->
-                        CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
-                    }
+                onAccion = { onVerCarta("entrantes") }
+            ) {
+                items(entrantes) { producto ->
+                    CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
                 }
-            )
+            }
             Spacer(Modifier.height(24.dp))
         }
 
-        // ── 🥤 CARRUSEL BEBIDAS ───────────────────────────────────────────────
+        // ── CARRUSEL BEBIDAS ──────────────────────────────────────────────────
         if (bebidas.isNotEmpty()) {
             SeccionCarrusel(
                 titulo = "Para beber 🥤",
                 accionLabel = "Ver bebidas",
-                onAccion = { onVerCarta("bebidas") },
-                contenido = {
-                    items(bebidas) { producto ->
-                        CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
-                    }
+                onAccion = { onVerCarta("bebidas") }
+            ) {
+                items(bebidas) { producto ->
+                    CardProductoUniforme(producto) { carritoViewModel.añadirProducto(producto) }
                 }
-            )
+            }
             Spacer(Modifier.height(24.dp))
         }
 
@@ -308,10 +309,77 @@ fun SeccionInicio(nombre: String, prodViewModel: ProductoViewModel, carritoViewM
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CARRUSEL DE PROMOS
+// BANNER OFERTA DEL DÍA — dinámico desde BD
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-fun SeccionPromoCards(carritoViewModel: CarritoViewModel) {
+fun BannerOfertaDia(oferta: Producto?, carritoViewModel: CarritoViewModel) {
+    val context = LocalContext.current
+    val ofertaAñadida = stringResource(R.string.principal_oferta_añadida)
+
+    // Si no hay ninguna oferta en la BD, no mostramos el banner
+    if (oferta == null) return
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFFB71C1C), RojoBK, Color(0xFFE53935))))
+            .height(175.dp)
+    ) {
+        Box(modifier = Modifier.size(180.dp).align(Alignment.CenterEnd).offset(x = 55.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.05f)))
+        Box(modifier = Modifier.size(90.dp).align(Alignment.BottomEnd).offset(x = (-12).dp, y = 36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.07f)))
+
+        Column(modifier = Modifier.align(Alignment.CenterStart).padding(20.dp)) {
+            Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = Color.White.copy(alpha = 0.2f),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Text(
+                    stringResource(R.string.principal_oferta_dia),
+                    color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                )
+            }
+            // ✅ Nombre y precio desde la BD
+            Text(oferta.nombre, color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp, lineHeight = 24.sp)
+            Text(
+                "${String.format("%.2f", oferta.precio)}€",
+                color = Color(0xFFFFE082), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+            )
+            Button(
+                onClick = {
+                    carritoViewModel.añadirProducto(oferta) // ✅ Producto real de la BD
+                    Toast.makeText(context, ofertaAñadida, Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo),
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                elevation = ButtonDefaults.buttonElevation(4.dp)
+            ) {
+                Icon(Icons.Default.AddShoppingCart, null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.principal_oferta_añadir), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+        }
+        Icon(
+            Icons.Default.Star, null,
+            modifier = Modifier.size(80.dp).align(Alignment.CenterEnd).padding(end = 20.dp),
+            tint = Color.White.copy(alpha = 0.1f)
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CARRUSEL DE PROMOS — dinámico desde BD
+// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+fun SeccionPromoCards(ofertas: List<Producto>, carritoViewModel: CarritoViewModel) {
+    // Si no hay ofertas en la BD, no mostramos la sección
+    if (ofertas.isEmpty()) return
+
     Column {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
@@ -323,7 +391,10 @@ fun SeccionPromoCards(carritoViewModel: CarritoViewModel) {
                 Text("Solo por tiempo limitado ⏰", fontSize = 12.sp, color = Color(0xFF9A7A5A))
             }
             Surface(shape = RoundedCornerShape(8.dp), color = RojoBK.copy(alpha = 0.1f)) {
-                Text("HOT", color = RojoBK, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                Text(
+                    "HOT", color = RojoBK, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
             }
         }
         Spacer(Modifier.height(12.dp))
@@ -331,44 +402,62 @@ fun SeccionPromoCards(carritoViewModel: CarritoViewModel) {
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(PROMOS) { promo ->
-                CardPromo(promo, carritoViewModel)
+            items(ofertas) { oferta ->
+                CardPromo(oferta, carritoViewModel)
             }
         }
     }
 }
 
 @Composable
-fun CardPromo(promo: PromoCard, carritoViewModel: CarritoViewModel) {
+fun CardPromo(oferta: Producto, carritoViewModel: CarritoViewModel) {
     val context = LocalContext.current
+    // Gradiente consistente basado en el id del producto
+    val gradiente = gradientesPromo[Math.abs(oferta.id.hashCode()) % gradientesPromo.size]
+
     Box(
         modifier = Modifier
             .width(220.dp)
             .height(155.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(Brush.linearGradient(promo.gradiente))
+            .background(Brush.linearGradient(gradiente))
     ) {
-        // Círculo decorativo
-        Box(modifier = Modifier.size(100.dp).align(Alignment.TopEnd).offset(x = 30.dp, y = (-20).dp).clip(CircleShape).background(Color.White.copy(alpha = 0.07f)))
-
+        Box(
+            modifier = Modifier.size(100.dp).align(Alignment.TopEnd)
+                .offset(x = 30.dp, y = (-20).dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.07f))
+        )
         Column(modifier = Modifier.align(Alignment.CenterStart).padding(16.dp)) {
-            Text(promo.emoji, fontSize = 24.sp)
+            Text("🔥", fontSize = 24.sp)
             Spacer(Modifier.height(4.dp))
-            Text(promo.titulo, color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(promo.subtitulo, color = Color.White.copy(alpha = 0.75f), fontSize = 11.sp, maxLines = 1)
+            // ✅ Nombre y descripción desde la BD
+            Text(
+                oferta.nombre,
+                color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                oferta.descripcion,
+                color = Color.White.copy(alpha = 0.75f), fontSize = 11.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
             Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Surface(shape = RoundedCornerShape(6.dp), color = Color.White.copy(alpha = 0.2f)) {
                     Text(
-                        "${String.format("%.2f", promo.precio)}€",
+                        "${String.format("%.2f", oferta.precio)}€",
                         color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )
                 }
                 Button(
                     onClick = {
-                        carritoViewModel.añadirProducto(promo.toProducto())
-                        Toast.makeText(context, "¡${promo.titulo} añadido!", Toast.LENGTH_SHORT).show()
+                        carritoViewModel.añadirProducto(oferta) // ✅ Producto real de la BD
+                        Toast.makeText(context, "¡${oferta.nombre} añadido!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.25f)),
                     shape = RoundedCornerShape(8.dp),
@@ -421,45 +510,42 @@ fun SeccionCarrusel(
 @Composable
 fun CardProductoUniforme(producto: Producto, onAdd: () -> Unit) {
     Card(
-        modifier = Modifier
-            .width(150.dp)
-            .height(220.dp), // ← ALTURA FIJA: todas iguales
+        modifier = Modifier.width(150.dp).height(220.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(3.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Imagen ocupa espacio fijo
             Box(modifier = Modifier.fillMaxWidth().height(110.dp)) {
                 AsyncImage(
-                    model = producto.imagenUrl, contentDescription = null,
+                    model = producto.imagenUrl,
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                     contentScale = ContentScale.Crop,
-                    placeholder = painterResource(R.drawable.logo), error = painterResource(R.drawable.logo)
+                    placeholder = painterResource(R.drawable.logo),
+                    error = painterResource(R.drawable.logo)
                 )
-                // Precio badge sobre imagen
                 Surface(
                     color = naranjaIllo,
                     shape = RoundedCornerShape(bottomEnd = 10.dp, topStart = 16.dp),
                     modifier = Modifier.align(Alignment.TopStart)
                 ) {
-                    Text("${producto.precio}€", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                    Text(
+                        "${producto.precio}€",
+                        color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
-
-            // Contenido inferior con altura fija mediante weight
             Column(
                 modifier = Modifier.fillMaxSize().padding(10.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     producto.nombre,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MarronBK,
-                    lineHeight = 17.sp,
+                    fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    color = MarronBK, lineHeight = 17.sp,
                     modifier = Modifier.weight(1f)
                 )
                 Button(
@@ -482,10 +568,22 @@ fun CardProductoUniforme(producto: Producto, onAdd: () -> Unit) {
 // CATEGORÍA CÍRCULO
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-fun ItemCategoriaCirculo(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+fun ItemCategoriaCirculo(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = Color.White, shadowElevation = 3.dp, modifier = Modifier.size(68.dp)) {
-            Box(contentAlignment = Alignment.Center) { Icon(icon, null, tint = naranjaIllo, modifier = Modifier.size(28.dp)) }
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            shadowElevation = 3.dp,
+            modifier = Modifier.size(68.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, null, tint = naranjaIllo, modifier = Modifier.size(28.dp))
+            }
         }
         Spacer(Modifier.height(6.dp))
         Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MarronBK)
@@ -505,12 +603,17 @@ fun CardInfoNegocio() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                painter = painterResource(R.drawable.logo), contentDescription = null,
+                painter = painterResource(R.drawable.logo),
+                contentDescription = null,
                 modifier = Modifier.fillMaxWidth().height(160.dp).padding(20.dp).clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Fit
             )
             Box(modifier = Modifier.fillMaxWidth().background(naranjaIllo).padding(12.dp)) {
-                Text(stringResource(R.string.principal_abierto), color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), fontSize = 14.sp)
+                Text(
+                    stringResource(R.string.principal_abierto),
+                    color = Color.White, fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth(), fontSize = 14.sp
+                )
             }
             Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.principal_nombre_negocio), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK)
@@ -525,7 +628,11 @@ fun CardInfoNegocio() {
 // ─────────────────────────────────────────────────────────────────────────────
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoViewModel, categoriaInicial: String) {
+fun SeccionCarta(
+    prodViewModel: ProductoViewModel,
+    carritoViewModel: CarritoViewModel,
+    categoriaInicial: String
+) {
     val categoriasPrincipales = listOf("campero", "entrantes", "postres", "bebidas")
     val etiquetasCategorias = listOf(
         stringResource(R.string.carta_campero),
@@ -548,7 +655,8 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
             indicator = { tabPositions ->
                 if (pagerState.currentPage < tabPositions.size) {
                     TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]).clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)),
+                        Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
+                            .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)),
                         color = naranjaIllo, height = 3.dp
                     )
                 }
@@ -571,7 +679,9 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
         }
 
         if (prodViewModel.cargando) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = naranjaIllo) }
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = naranjaIllo)
+            }
         } else {
             HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { pageIndex ->
                 val catActual = categoriasPrincipales[pageIndex]
@@ -592,11 +702,20 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 100.dp)) {
                         productosFiltradosYAgrupados.forEach { (subCat, productos) ->
                             stickyHeader {
-                                Box(modifier = Modifier.fillMaxWidth().background(CremaBK).padding(horizontal = 16.dp, vertical = 10.dp)) {
-                                    Text(if (subCat.isBlank()) variosLabel else subCat.uppercase(), fontWeight = FontWeight.Black, color = MarronBK, fontSize = 12.sp, letterSpacing = 1.sp)
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().background(CremaBK)
+                                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        if (subCat.isBlank()) variosLabel else subCat.uppercase(),
+                                        fontWeight = FontWeight.Black, color = MarronBK,
+                                        fontSize = 12.sp, letterSpacing = 1.sp
+                                    )
                                 }
                             }
-                            items(productos) { producto -> FilaProductoCliente(producto) { carritoViewModel.añadirProducto(producto) } }
+                            items(productos) { producto ->
+                                FilaProductoCliente(producto) { carritoViewModel.añadirProducto(producto) }
+                            }
                         }
                     }
                 }
@@ -618,20 +737,27 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
                 model = producto.imagenUrl, contentDescription = null,
                 modifier = Modifier.size(88.dp).clip(RoundedCornerShape(10.dp)),
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = R.drawable.logo), error = painterResource(id = R.drawable.logo)
+                placeholder = painterResource(id = R.drawable.logo),
+                error = painterResource(id = R.drawable.logo)
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(producto.nombre, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MarronBK, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 if (producto.descripcion.isNotBlank()) {
-                    Text(producto.descripcion, fontSize = 12.sp, color = Color(0xFF9A9A9A), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
+                    Text(
+                        producto.descripcion, fontSize = 12.sp, color = Color(0xFF9A9A9A),
+                        maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
                 }
                 Spacer(Modifier.height(6.dp))
                 Text("${producto.precio}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 16.sp)
             }
             Spacer(Modifier.width(8.dp))
             Surface(onClick = onAdd, shape = RoundedCornerShape(10.dp), color = naranjaIllo, modifier = Modifier.size(36.dp)) {
-                Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(20.dp)) }
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Add, null, tint = Color.White, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }
@@ -677,53 +803,89 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                                 Text(item.producto.nombre, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MarronBK)
                                 Text("${item.producto.precio}€ / ud", fontSize = 12.sp, color = Color.Gray)
                             }
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                IconButton(onClick = { carritoViewModel.quitarProducto(item.producto) }, modifier = Modifier.size(32.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                IconButton(
+                                    onClick = { carritoViewModel.quitarProducto(item.producto) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
                                     Icon(Icons.Default.RemoveCircleOutline, null, tint = RojoBK, modifier = Modifier.size(22.dp))
                                 }
-                                Text("${item.cantidad}", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MarronBK, modifier = Modifier.widthIn(min = 20.dp), textAlign = TextAlign.Center)
-                                IconButton(onClick = { carritoViewModel.añadirProducto(item.producto) }, modifier = Modifier.size(32.dp)) {
+                                Text(
+                                    "${item.cantidad}",
+                                    fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = MarronBK,
+                                    modifier = Modifier.widthIn(min = 20.dp), textAlign = TextAlign.Center
+                                )
+                                IconButton(
+                                    onClick = { carritoViewModel.añadirProducto(item.producto) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
                                     Icon(Icons.Default.AddCircle, null, tint = naranjaIllo, modifier = Modifier.size(22.dp))
                                 }
                             }
-                            Text("${String.format("%.2f", item.producto.precio * item.cantidad)}€", fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
+                            Text(
+                                "${String.format("%.2f", item.producto.precio * item.cantidad)}€",
+                                fontWeight = FontWeight.ExtraBold, color = naranjaIllo, fontSize = 14.sp,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
                         }
                     }
                 }
                 item {
                     OutlinedTextField(
-                        value = carritoViewModel.notasInput, onValueChange = { carritoViewModel.notasInput = it },
+                        value = carritoViewModel.notasInput,
+                        onValueChange = { carritoViewModel.notasInput = it },
                         label = { Text(stringResource(R.string.cesta_notas)) },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = naranjaIllo, focusedLabelColor = naranjaIllo)
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = naranjaIllo,
+                            focusedLabelColor = naranjaIllo
+                        )
                     )
                 }
                 item {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         FilterChip(
                             selected = carritoViewModel.metodoPagoSeleccionado == "Efectivo",
                             onClick = { carritoViewModel.metodoPagoSeleccionado = "Efectivo" },
                             label = { Text(stringResource(R.string.cesta_efectivo), fontWeight = FontWeight.SemiBold) },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0xFFFFF3E0),
+                                selectedLabelColor = naranjaIllo
+                            ),
                             modifier = Modifier.weight(1f)
                         )
                         FilterChip(
                             selected = carritoViewModel.metodoPagoSeleccionado == "Tarjeta",
                             onClick = { carritoViewModel.metodoPagoSeleccionado = "Tarjeta" },
                             label = { Text(stringResource(R.string.cesta_tarjeta), fontWeight = FontWeight.SemiBold) },
-                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0xFFFFF3E0),
+                                selectedLabelColor = naranjaIllo
+                            ),
                             modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
 
-            Surface(tonalElevation = 0.dp, color = Color.White, shadowElevation = 12.dp, shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)) {
+            Surface(
+                tonalElevation = 0.dp, color = Color.White, shadowElevation = 12.dp,
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+            ) {
                 Column(Modifier.padding(20.dp)) {
                     Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
                         Text(stringResource(R.string.cesta_total), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.Gray)
-                        Text("${String.format("%.2f", carritoViewModel.calcularTotal())}€", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK)
+                        Text(
+                            "${String.format("%.2f", carritoViewModel.calcularTotal())}€",
+                            fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK
+                        )
                     }
                     Spacer(Modifier.height(12.dp))
                     Button(
@@ -731,12 +893,15 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                             if (usuarioViewModel.nombre.isBlank() || usuarioViewModel.direccion.isBlank() || usuarioViewModel.telefono.isBlank()) {
                                 Toast.makeText(context, msgRellena, Toast.LENGTH_LONG).show()
                             } else {
-                                if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") mostrarPagoFake = true
-                                else carritoViewModel.finalizarPedido(
-                                    usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
-                                    { Toast.makeText(context, msgPedidoEnviado, Toast.LENGTH_SHORT).show() },
-                                    { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
-                                )
+                                if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") {
+                                    mostrarPagoFake = true
+                                } else {
+                                    carritoViewModel.finalizarPedido(
+                                        usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
+                                        { Toast.makeText(context, msgPedidoEnviado, Toast.LENGTH_SHORT).show() },
+                                        { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                    )
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -745,8 +910,14 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                         enabled = !carritoViewModel.enviandoPedido,
                         elevation = ButtonDefaults.buttonElevation(0.dp)
                     ) {
-                        if (carritoViewModel.enviandoPedido) CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                        else Text(stringResource(R.string.cesta_realizar_pedido), fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, letterSpacing = 0.5.sp)
+                        if (carritoViewModel.enviandoPedido) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        } else {
+                            Text(
+                                stringResource(R.string.cesta_realizar_pedido),
+                                fontWeight = FontWeight.ExtraBold, fontSize = 15.sp, letterSpacing = 0.5.sp
+                            )
+                        }
                     }
                 }
             }
@@ -760,13 +931,28 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
             title = { Text(stringResource(R.string.cesta_pago_seguro), fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("${stringResource(R.string.cesta_total)} ${String.format("%.2f", carritoViewModel.calcularTotal())}€", fontWeight = FontWeight.Bold, color = naranjaIllo, fontSize = 18.sp)
+                    Text(
+                        "${stringResource(R.string.cesta_total)} ${String.format("%.2f", carritoViewModel.calcularTotal())}€",
+                        fontWeight = FontWeight.Bold, color = naranjaIllo, fontSize = 18.sp
+                    )
                     Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_num_tarjeta)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+                    OutlinedTextField(
+                        value = "", onValueChange = {},
+                        label = { Text(stringResource(R.string.cesta_num_tarjeta)) },
+                        modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)
+                    )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_exp)) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp))
-                        OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_cvv)) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp))
+                        OutlinedTextField(
+                            value = "", onValueChange = {},
+                            label = { Text(stringResource(R.string.cesta_exp)) },
+                            modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp)
+                        )
+                        OutlinedTextField(
+                            value = "", onValueChange = {},
+                            label = { Text(stringResource(R.string.cesta_cvv)) },
+                            modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp)
+                        )
                     }
                 }
             },
@@ -774,7 +960,8 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                 Button(
                     onClick = {
                         mostrarPagoFake = false
-                        carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
+                        carritoViewModel.finalizarPedido(
+                            usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
                             { Toast.makeText(context, msgPagoRealizado, Toast.LENGTH_SHORT).show() },
                             { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
                         )
@@ -783,7 +970,11 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                     shape = RoundedCornerShape(10.dp)
                 ) { Text(stringResource(R.string.cesta_pagar), fontWeight = FontWeight.Bold) }
             },
-            dismissButton = { TextButton(onClick = { mostrarPagoFake = false }) { Text("Cancelar", color = Color.Gray) } }
+            dismissButton = {
+                TextButton(onClick = { mostrarPagoFake = false }) {
+                    Text("Cancelar", color = Color.Gray)
+                }
+            }
         )
     }
 }
@@ -792,24 +983,61 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
 // MENÚ LATERAL
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-fun MenuLateral(nombre: String, navController: NavController, drawerState: DrawerState, onCerrar: () -> Unit) {
+fun MenuLateral(
+    nombre: String,
+    navController: NavController,
+    drawerState: DrawerState,
+    onCerrar: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val holaMenu = stringResource(R.string.menu_hola, nombre)
-    ModalDrawerSheet(modifier = Modifier.width(280.dp), drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)) {
-        Box(modifier = Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(MarronBK, Color(0xFF4A2008)))).padding(24.dp, 36.dp)) {
+
+    ModalDrawerSheet(
+        modifier = Modifier.width(280.dp),
+        drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+                .background(Brush.linearGradient(listOf(MarronBK, Color(0xFF4A2008))))
+                .padding(24.dp, 36.dp)
+        ) {
             Column {
-                Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(naranjaIllo), contentAlignment = Alignment.Center) {
-                    Text(nombre.firstOrNull()?.uppercaseChar()?.toString() ?: "I", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
+                Box(
+                    modifier = Modifier.size(52.dp).clip(CircleShape).background(naranjaIllo),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        nombre.firstOrNull()?.uppercaseChar()?.toString() ?: "I",
+                        color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp
+                    )
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(holaMenu, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
         }
         Spacer(Modifier.height(8.dp))
-        NavigationDrawerItem(label = { Text(stringResource(R.string.menu_perfil), fontWeight = FontWeight.Medium) }, selected = false, icon = { Icon(Icons.Default.Person, null, tint = MarronBK) }, onClick = { scope.launch { drawerState.close() }; navController.navigate("configuracion") }, modifier = Modifier.padding(horizontal = 12.dp))
-        NavigationDrawerItem(label = { Text(stringResource(R.string.menu_pedidos), fontWeight = FontWeight.Medium) }, selected = false, icon = { Icon(Icons.Default.List, null, tint = MarronBK) }, onClick = { scope.launch { drawerState.close() }; navController.navigate("mis_pedidos") }, modifier = Modifier.padding(horizontal = 12.dp))
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_perfil), fontWeight = FontWeight.Medium) },
+            selected = false,
+            icon = { Icon(Icons.Default.Person, null, tint = MarronBK) },
+            onClick = { scope.launch { drawerState.close() }; navController.navigate("configuracion") },
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_pedidos), fontWeight = FontWeight.Medium) },
+            selected = false,
+            icon = { Icon(Icons.Default.List, null, tint = MarronBK) },
+            onClick = { scope.launch { drawerState.close() }; navController.navigate("mis_pedidos") },
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
         Spacer(Modifier.weight(1f))
         HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp))
-        NavigationDrawerItem(label = { Text(stringResource(R.string.menu_cerrar_sesion), color = RojoBK, fontWeight = FontWeight.Medium) }, selected = false, icon = { Icon(Icons.Default.ExitToApp, null, tint = RojoBK) }, onClick = onCerrar, modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
+        NavigationDrawerItem(
+            label = { Text(stringResource(R.string.menu_cerrar_sesion), color = RojoBK, fontWeight = FontWeight.Medium) },
+            selected = false,
+            icon = { Icon(Icons.Default.ExitToApp, null, tint = RojoBK) },
+            onClick = onCerrar,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        )
     }
 }
