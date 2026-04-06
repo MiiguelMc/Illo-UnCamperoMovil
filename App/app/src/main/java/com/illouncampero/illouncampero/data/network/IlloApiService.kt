@@ -1,6 +1,7 @@
 package com.illouncampero.illouncampero.data.network
 
 import Usuario
+import com.illouncampero.illouncampero.model.CuponResponse
 import com.illouncampero.illouncampero.model.Pedido
 import com.illouncampero.illouncampero.model.Producto
 import retrofit2.Response
@@ -88,6 +89,12 @@ interface IlloApiService {
         @Path("id") id: String,
         @Body producto: Producto
     ): Response<Unit>
+
+    @POST("api/cupones/validar")
+    suspend fun validarCupon(
+        @Header("Authorization") token: String, // ← Añadimos esto
+        @Body body: Map<String, String>
+    ): Response<CuponResponse> // ← Usamos el modelo nuevo
 
     companion object  // companion object vacío — está bien así
 }
