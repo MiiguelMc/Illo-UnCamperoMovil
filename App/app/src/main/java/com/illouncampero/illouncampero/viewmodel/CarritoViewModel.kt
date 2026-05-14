@@ -133,6 +133,26 @@ class CarritoViewModel : ViewModel() {
     }
 
     // ── Pedido ───────────────────────────────────────────────────────────────
+
+    var clientSecretStripe by mutableStateOf<String?>(null)
+        private set
+
+    private fun construirPedido(user: com.google.firebase.auth.FirebaseUser, nombre: String, tel: String, dir: String) =
+        Pedido(
+            idUsuario      = user.uid,
+            nombreCliente  = nombre,
+            telefono       = tel,
+            direccion      = dir,
+            notasGenerales = notasInput,
+            metodoPago     = metodoPagoSeleccionado,
+            productos      = items.map {
+                DetallePedido(it.producto.id, it.producto.nombre, it.cantidad, it.producto.precio)
+            },
+            total          = calcularTotal(),
+            cupon          = cuponAplicado,
+            descuento      = calcularAhorro()
+        )
+
     fun finalizarPedido(
         nombreCli: String,
         telCli: String,
@@ -145,22 +165,7 @@ class CarritoViewModel : ViewModel() {
             enviandoPedido = true
             try {
                 val token = "Bearer ${user.getIdToken(false).await().token}"
-                val nuevoPedido = Pedido(
-                    idUsuario      = user.uid,
-                    nombreCliente  = nombreCli,
-                    telefono       = telCli,
-                    direccion      = dirCli,
-                    notasGenerales = notasInput,
-                    metodoPago     = metodoPagoSeleccionado, // ✅ Enviamos el método de pago
-                    productos      = items.map {
-                        DetallePedido(it.producto.id, it.producto.nombre, it.cantidad, it.producto.precio)
-                    },
-                    // --- AQUÍ ESTÁ LO QUE FALTABA ---
-                    total          = calcularTotal(),   // Enviamos el total ya descontado
-                    cupon          = cuponAplicado,     // Enviamos "LOLO" (o null si no hay)
-                    descuento      = calcularAhorro()   // Enviamos el importe que se ha restado
-                )
-                val response = api.realizarPedido(token, nuevoPedido)
+                val response = api.realizarPedido(token, construirPedido(user, nombreCli, telCli, dirCli))
                 if (response.isSuccessful) {
                     vaciarCarrito()
                     notasInput = ""
@@ -174,6 +179,53 @@ class CarritoViewModel : ViewModel() {
                 enviandoPedido = false
             }
         }
+    }
+
+    fun finalizarPedidoConTarjeta(
+        nombreCli: String,
+        telCli: String,
+        dirCli: String,
+        onError: (String) -> Unit
+    ) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        viewModelScope.launch {
+            enviandoPedido = true
+            try {
+                val token = "Bearer ${user.getIdToken(false).await().token}"
+                val pedidoResp = api.realizarPedido(token, construirPedido(user, nombreCli, telCli, dirCli))
+                if (!pedidoResp.isSuccessful) {
+                    onError("Error al crear pedido: ${pedidoResp.code()}")
+                    return@launch
+                }
+                val pedidoId = pedidoResp.body()?.get("id") ?: run {
+                    onError("Error: respuesta sin ID")
+                    return@launch
+                }
+                val intentResp = api.crearIntentPago(token, mapOf("pedidoId" to pedidoId))
+                if (!intentResp.isSuccessful) {
+                    onError("Error al preparar el pago: ${intentResp.code()}")
+                    return@launch
+                }
+                clientSecretStripe = intentResp.body()?.get("clientSecret") ?: run {
+                    onError("Error: sin clientSecret")
+                    return@launch
+                }
+            } catch (e: Exception) {
+                onError("Error de red")
+            } finally {
+                enviandoPedido = false
+            }
+        }
+    }
+
+    fun onPagoExitoso() {
+        clientSecretStripe = null
+        vaciarCarrito()
+        notasInput = ""
+    }
+
+    fun onPagoCancelado() {
+        clientSecretStripe = null
     }
 
     fun vaciarCarrito() {

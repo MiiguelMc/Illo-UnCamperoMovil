@@ -54,7 +54,13 @@ interface IlloApiService {
     suspend fun realizarPedido(
         @Header("Authorization") token: String,
         @Body pedido: Pedido
-    ): Response<Unit>
+    ): Response<Map<String, String>>
+
+    @POST("api/pagos/crear-intent")
+    suspend fun crearIntentPago(
+        @Header("Authorization") token: String,
+        @Body body: Map<String, String>
+    ): Response<Map<String, String>>
 
     @GET("api/pedidos/mis-pedidos")
     suspend fun getMisPedidos(

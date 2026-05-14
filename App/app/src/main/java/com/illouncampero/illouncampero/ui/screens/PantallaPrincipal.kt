@@ -39,6 +39,9 @@ import coil.compose.AsyncImage
 import com.illouncampero.illouncampero.R
 import com.illouncampero.illouncampero.model.Producto
 import com.illouncampero.illouncampero.viewmodel.*
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 import kotlinx.coroutines.launch
 
 
@@ -177,7 +180,7 @@ fun SeccionInicio(
 
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
             Text(holaTexto, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = MarronBK)
-            Text("¿Qué vas a pedir hoy?", fontSize = 13.sp, color = Color(0xFF9A7A5A))
+            Text(stringResource(R.string.inicio_subtitulo), fontSize = 13.sp, color = Color(0xFF9A7A5A))
         }
 
         BannerOfertaDia(ofertaDestacada, carritoViewModel)
@@ -206,19 +209,19 @@ fun SeccionInicio(
         Spacer(Modifier.height(28.dp))
 
         if (camperos.isNotEmpty()) {
-            SeccionCarrusel(titulo = stringResource(R.string.principal_mas_vendidos), accionLabel = "Ver todos", onAccion = { onVerCarta("campero") }) {
+            SeccionCarrusel(titulo = stringResource(R.string.principal_mas_vendidos), accionLabel = stringResource(R.string.inicio_ver_todos), onAccion = { onVerCarta("campero") }) {
                 items(camperos) { CardProductoUniforme(it) { carritoViewModel.añadirProducto(it) } }
             }
             Spacer(Modifier.height(24.dp))
         }
         if (entrantes.isNotEmpty()) {
-            SeccionCarrusel(titulo = "Para picar 🍟", accionLabel = "Ver entrantes", onAccion = { onVerCarta("entrantes") }) {
+            SeccionCarrusel(titulo = stringResource(R.string.inicio_para_picar), accionLabel = stringResource(R.string.inicio_ver_entrantes), onAccion = { onVerCarta("entrantes") }) {
                 items(entrantes) { CardProductoUniforme(it) { carritoViewModel.añadirProducto(it) } }
             }
             Spacer(Modifier.height(24.dp))
         }
         if (bebidas.isNotEmpty()) {
-            SeccionCarrusel(titulo = "Para beber 🥤", accionLabel = "Ver bebidas", onAccion = { onVerCarta("bebidas") }) {
+            SeccionCarrusel(titulo = stringResource(R.string.inicio_para_beber), accionLabel = stringResource(R.string.inicio_ver_bebidas), onAccion = { onVerCarta("bebidas") }) {
                 items(bebidas) { CardProductoUniforme(it) { carritoViewModel.añadirProducto(it) } }
             }
             Spacer(Modifier.height(24.dp))
@@ -277,11 +280,11 @@ fun SeccionPromoCards(ofertas: List<Producto>, carritoViewModel: CarritoViewMode
     Column {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
-                Text("Ofertas exclusivas", fontWeight = FontWeight.ExtraBold, color = MarronBK, fontSize = 16.sp)
-                Text("Solo por tiempo limitado ⏰", fontSize = 12.sp, color = Color(0xFF9A7A5A))
+                Text(stringResource(R.string.inicio_ofertas_exclusivas), fontWeight = FontWeight.ExtraBold, color = MarronBK, fontSize = 16.sp)
+                Text(stringResource(R.string.inicio_tiempo_limitado), fontSize = 12.sp, color = Color(0xFF9A7A5A))
             }
             Surface(shape = RoundedCornerShape(8.dp), color = RojoBK.copy(alpha = 0.1f)) {
-                Text("HOT", color = RojoBK, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                Text(stringResource(R.string.inicio_hot), color = RojoBK, fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
             }
         }
         Spacer(Modifier.height(12.dp))
@@ -308,13 +311,13 @@ fun CardPromo(oferta: Producto, carritoViewModel: CarritoViewModel) {
                     Text("${String.format("%.2f", oferta.precio)}€", color = Color.White, fontWeight = FontWeight.Black, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
                 }
                 Button(
-                    onClick = { carritoViewModel.añadirProducto(oferta); Toast.makeText(context, "¡${oferta.nombre} añadido!", Toast.LENGTH_SHORT).show() },
+                    onClick = { carritoViewModel.añadirProducto(oferta); Toast.makeText(context, context.getString(R.string.inicio_producto_añadido, oferta.nombre), Toast.LENGTH_SHORT).show() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.25f)),
                     shape = RoundedCornerShape(8.dp), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), elevation = ButtonDefaults.buttonElevation(0.dp)
                 ) {
                     Icon(Icons.Default.AddShoppingCart, null, tint = Color.White, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Añadir", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(stringResource(R.string.inicio_añadir), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
         }
@@ -354,7 +357,7 @@ fun CardProductoUniforme(producto: Producto, onAdd: () -> Unit) {
                 Button(onClick = onAdd, modifier = Modifier.fillMaxWidth().height(32.dp), colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo), shape = RoundedCornerShape(8.dp), contentPadding = PaddingValues(0.dp)) {
                     Icon(Icons.Default.Add, null, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Añadir", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.inicio_añadir), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -438,7 +441,7 @@ fun SeccionCarta(prodViewModel: ProductoViewModel, carritoViewModel: CarritoView
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(Icons.Default.SearchOff, null, tint = Color(0xFFCCCCCC), modifier = Modifier.size(48.dp))
                             Spacer(Modifier.height(8.dp))
-                            Text("No hay productos en ${catActual.uppercase()}", color = Color.Gray, fontSize = 14.sp)
+                            Text(stringResource(R.string.sin_productos_categoria, catActual.uppercase()), color = Color.Gray, fontSize = 14.sp)
                         }
                     }
                 } else {
@@ -485,10 +488,32 @@ fun FilaProductoCliente(producto: Producto, onAdd: () -> Unit) {
 @Composable
 fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
-    var mostrarPagoFake by remember { mutableStateOf(false) }
     val msgRellena       = stringResource(R.string.cesta_rellena_perfil)
     val msgPedidoEnviado = stringResource(R.string.cesta_pedido_enviado)
     val msgPagoRealizado = stringResource(R.string.cesta_pago_realizado)
+
+    val paymentSheet = rememberPaymentSheet { result ->
+        when (result) {
+            is PaymentSheetResult.Completed -> {
+                carritoViewModel.onPagoExitoso()
+                Toast.makeText(context, msgPagoRealizado, Toast.LENGTH_SHORT).show()
+            }
+            is PaymentSheetResult.Canceled -> carritoViewModel.onPagoCancelado()
+            is PaymentSheetResult.Failed   -> {
+                carritoViewModel.onPagoCancelado()
+                Toast.makeText(context, "Error en el pago: ${result.error.localizedMessage}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    LaunchedEffect(carritoViewModel.clientSecretStripe) {
+        carritoViewModel.clientSecretStripe?.let { secret ->
+            paymentSheet.presentWithPaymentIntent(
+                secret,
+                PaymentSheet.Configuration("Illo Un Campero")
+            )
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth().background(Color.White).padding(horizontal = 20.dp, vertical = 16.dp)) {
@@ -561,12 +586,12 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                     // Desglose solo visible cuando hay cupón aplicado
                     if (carritoViewModel.cuponAplicado != null) {
                         Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
-                            Text("Subtotal", fontSize = 14.sp, color = Color.Gray)
+                            Text(stringResource(R.string.cesta_subtotal), fontSize = 14.sp, color = Color.Gray)
                             Text("${String.format("%.2f", carritoViewModel.calcularSubtotal())}€", fontSize = 14.sp, color = Color.Gray)
                         }
                         Spacer(Modifier.height(4.dp))
                         Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
-                            Text("Descuento (${carritoViewModel.cuponDescuento.toInt()}%)", fontSize = 14.sp, color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.cesta_descuento, carritoViewModel.cuponDescuento.toInt()), fontSize = 14.sp, color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
                             Text("-${String.format("%.2f", carritoViewModel.calcularAhorro())}€", fontSize = 14.sp, color = Color(0xFF2E7D32), fontWeight = FontWeight.SemiBold)
                         }
                         Spacer(Modifier.height(8.dp))
@@ -584,10 +609,15 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                             if (usuarioViewModel.nombre.isBlank() || usuarioViewModel.direccion.isBlank() || usuarioViewModel.telefono.isBlank()) {
                                 Toast.makeText(context, msgRellena, Toast.LENGTH_LONG).show()
                             } else {
-                                if (carritoViewModel.metodoPagoSeleccionado == "TARJETA") mostrarPagoFake = true
-                                else carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
-                                    { Toast.makeText(context, msgPedidoEnviado, Toast.LENGTH_SHORT).show() },
-                                    { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
+                                if (carritoViewModel.metodoPagoSeleccionado == "TARJETA") {
+                                    carritoViewModel.finalizarPedidoConTarjeta(
+                                        usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion
+                                    ) { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
+                                } else {
+                                    carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
+                                        { Toast.makeText(context, msgPedidoEnviado, Toast.LENGTH_SHORT).show() },
+                                        { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -604,37 +634,6 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
         }
     }
 
-    if (mostrarPagoFake) {
-        AlertDialog(
-            onDismissRequest = { mostrarPagoFake = false },
-            shape = RoundedCornerShape(20.dp),
-            title = { Text(stringResource(R.string.cesta_pago_seguro), fontWeight = FontWeight.Bold) },
-            text = {
-                Column {
-                    Text("${stringResource(R.string.cesta_total)} ${String.format("%.2f", carritoViewModel.calcularTotal())}€", fontWeight = FontWeight.Bold, color = naranjaIllo, fontSize = 18.sp)
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_num_tarjeta)) }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_exp)) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp))
-                        OutlinedTextField(value = "", onValueChange = {}, label = { Text(stringResource(R.string.cesta_cvv)) }, modifier = Modifier.weight(1f), shape = RoundedCornerShape(10.dp))
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        mostrarPagoFake = false
-                        carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
-                            { Toast.makeText(context, msgPagoRealizado, Toast.LENGTH_SHORT).show() },
-                            { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = naranjaIllo), shape = RoundedCornerShape(10.dp)
-                ) { Text(stringResource(R.string.cesta_pagar), fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = { TextButton(onClick = { mostrarPagoFake = false }) { Text("Cancelar", color = Color.Gray) } }
-        )
-    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -661,19 +660,19 @@ fun CuponDescuentoBox(carritoViewModel: CarritoViewModel) {
                         Text(carritoViewModel.cuponDescripcion, fontSize = 12.sp, color = Color(0xFF2E7D32))
                     }
                     IconButton(onClick = { carritoViewModel.quitarCupon() }, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Quitar cupón", tint = Color.Gray, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cupon_quitar), tint = Color.Gray, modifier = Modifier.size(18.dp))
                     }
                 }
                 return@Column
             }
 
             // ── Estado: campo para introducir cupón ───────────────────────────
-            Text("¿Tienes un cupón?", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = MarronBK, modifier = Modifier.padding(bottom = 8.dp))
+            Text(stringResource(R.string.cupon_tienes_cupon), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = MarronBK, modifier = Modifier.padding(bottom = 8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = carritoViewModel.cuponInput,
                     onValueChange = { carritoViewModel.cuponInput = it.uppercase(); carritoViewModel.cuponError = null },
-                    placeholder = { Text("Ej: LOLO", fontSize = 13.sp, color = Color.LightGray) },
+                    placeholder = { Text(stringResource(R.string.cupon_placeholder), fontSize = 13.sp, color = Color.LightGray) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
                     singleLine = true,
@@ -690,7 +689,7 @@ fun CuponDescuentoBox(carritoViewModel: CarritoViewModel) {
                     if (carritoViewModel.validandoCupon) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Aplicar", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(stringResource(R.string.cupon_aplicar), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 }
             }

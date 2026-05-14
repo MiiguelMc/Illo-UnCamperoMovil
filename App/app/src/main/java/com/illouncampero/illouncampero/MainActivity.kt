@@ -25,6 +25,7 @@ import com.illouncampero.illouncampero.viewmodel.CarritoViewModel
 import com.illouncampero.illouncampero.viewmodel.PedidoViewModel
 import com.illouncampero.illouncampero.viewmodel.ProductoViewModel
 import com.illouncampero.illouncampero.viewmodel.UsuarioViewModel
+import com.stripe.android.PaymentConfiguration
 
 class MainActivity : ComponentActivity() {
 
@@ -50,6 +51,8 @@ class MainActivity : ComponentActivity() {
                 permisosNotificacion.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+
+        PaymentConfiguration.init(applicationContext, "pk_test_51TNry3BCLmntR5kviEvyUfcAWWBh8ZAuLIOtoRhZNiPJbmUupsfPdcoDPauHB6Dtm7nFk8wwmlSd79iiugktDR9500AV69yRGO")
 
         val authViewModel = AuthViewModel()
         val productosViewModel = ProductoViewModel()

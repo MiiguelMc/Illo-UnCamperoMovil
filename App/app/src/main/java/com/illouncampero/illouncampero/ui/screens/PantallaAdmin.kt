@@ -110,7 +110,7 @@ fun PantallaAdmin(
                     Button(
                         onClick = {
                             productoViewModel.guardarProducto(
-                                onSuccess = { Toast.makeText(context, "Guardado", Toast.LENGTH_SHORT).show() },
+                                onSuccess = { Toast.makeText(context, context.getString(R.string.admin_guardado), Toast.LENGTH_SHORT).show() },
                                 onError = { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                             )
                         },
@@ -133,7 +133,7 @@ fun PantallaAdmin(
                     FilaProductoAdmin(
                         producto = producto,
                         onDelete = {
-                            productoViewModel.eliminarProducto(producto.id, { Toast.makeText(context, "Eliminado", Toast.LENGTH_SHORT).show() }, {})
+                            productoViewModel.eliminarProducto(producto.id, { Toast.makeText(context, context.getString(R.string.admin_eliminado_ok), Toast.LENGTH_SHORT).show() }, {})
                         },
                         onEdit = {
                             adminViewModel.prepararEdicion(producto)
@@ -162,12 +162,12 @@ fun FilaProductoAdmin(producto: Producto, onDelete: () -> Unit, onEdit: () -> Un
                 Text(producto.nombre, fontWeight = FontWeight.Bold)
                 Text("${producto.precio}€", color = Color.DarkGray, fontSize = 13.sp)
                 if (!producto.disponible) {
-                    Text("NO DISPONIBLE", color = Color.Red, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.admin_no_disponible), color = Color.Red, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
             Row {
-                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, "Editar", tint = Color.DarkGray) }
-                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, "Borrar", tint = Color.Red) }
+                IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, stringResource(R.string.admin_editar), tint = Color.DarkGray) }
+                IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, stringResource(R.string.admin_borrar), tint = Color.Red) }
             }
         }
     }
@@ -188,7 +188,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 Icon(Icons.Default.Edit, contentDescription = null, tint = naranjaIllo, modifier = Modifier.size(24.dp))
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = "EDITAR PRODUCTO",
+                    text = stringResource(R.string.admin_editar_producto),
                     fontWeight = FontWeight.Black,
                     fontSize = 20.sp,
                     color = marronCocina
@@ -206,7 +206,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 OutlinedTextField(
                     value = adminViewModel.nombreEdit,
                     onValueChange = { adminViewModel.nombreEdit = it },
-                    label = { Text("Nombre del Campero") },
+                    label = { Text(stringResource(R.string.admin_nombre_campero)) },
                     leadingIcon = { Icon(Icons.Default.Fastfood, null, tint = naranjaIllo) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -221,7 +221,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 OutlinedTextField(
                     value = adminViewModel.precioEdit,
                     onValueChange = { adminViewModel.precioEdit = it },
-                    label = { Text("Precio (€)") },
+                    label = { Text(stringResource(R.string.admin_precio)) },
                     leadingIcon = { Icon(Icons.Default.EuroSymbol, null, tint = naranjaIllo) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -236,7 +236,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 OutlinedTextField(
                     value = adminViewModel.descripcionEdit,
                     onValueChange = { adminViewModel.descripcionEdit = it },
-                    label = { Text("Descripción") },
+                    label = { Text(stringResource(R.string.admin_descripcion)) },
                     modifier = Modifier.fillMaxWidth().height(100.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -264,7 +264,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = if (adminViewModel.disponibleEdit) "Producto Disponible" else "Agotado / Pausado",
+                                text = if (adminViewModel.disponibleEdit) stringResource(R.string.admin_disponible_texto) else stringResource(R.string.admin_agotado),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = if (adminViewModel.disponibleEdit) Color(0xFF2E7D32) else Color(0xFFC62828)
@@ -287,7 +287,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 onClick = {
                     adminViewModel.guardarCambios(
                         productoViewModel = productoViewModel,
-                        onSuccess = { Toast.makeText(context, "¡Campero actualizado!", Toast.LENGTH_SHORT).show() },
+                        onSuccess = { Toast.makeText(context, context.getString(R.string.admin_actualizado), Toast.LENGTH_SHORT).show() },
                         onError = { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                     )
                 },
@@ -298,7 +298,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 if (adminViewModel.cargandoEdicion) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
                 } else {
-                    Text("GUARDAR CAMBIOS", fontWeight = FontWeight.Black)
+                    Text(stringResource(R.string.config_guardar), fontWeight = FontWeight.Black)
                 }
             }
         },
@@ -307,7 +307,7 @@ fun DialogoEditarProducto(adminViewModel: AdminViewModel, productoViewModel: Pro
                 onClick = { adminViewModel.mostrarModal = false },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancelar", color = Color.Gray, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.admin_cancelar), color = Color.Gray, fontWeight = FontWeight.Bold)
             }
         }
     )

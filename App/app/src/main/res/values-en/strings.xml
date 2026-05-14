@@ -150,4 +150,37 @@
     <!-- Varios -->
     <string name="sin_productos_categoria">No products in %1$s</string>
     <string name="varios">OTHERS</string>
+
+    <!-- SeccionInicio -->
+    <string name="inicio_subtitulo">What are you having today?</string>
+    <string name="inicio_ver_todos">See all</string>
+    <string name="inicio_para_picar">Snacks 🍟</string>
+    <string name="inicio_ver_entrantes">See starters</string>
+    <string name="inicio_para_beber">Drinks 🥤</string>
+    <string name="inicio_ver_bebidas">See drinks</string>
+    <string name="inicio_ofertas_exclusivas">Exclusive deals</string>
+    <string name="inicio_tiempo_limitado">Limited time only ⏰</string>
+    <string name="inicio_hot">HOT</string>
+    <string name="inicio_producto_añadido">%1$s added!</string>
+    <string name="inicio_añadir">Add</string>
+
+    <!-- Cesta / Cupón -->
+    <string name="cesta_subtotal">Subtotal</string>
+    <string name="cesta_descuento">Discount (%1$d%%)</string>
+    <string name="cupon_tienes_cupon">Have a coupon?</string>
+    <string name="cupon_placeholder">e.g. LOLO</string>
+    <string name="cupon_aplicar">Apply</string>
+    <string name="cupon_quitar">Remove coupon</string>
+
+    <!-- Admin extra -->
+    <string name="admin_guardado">Saved</string>
+    <string name="admin_eliminado_ok">Deleted</string>
+    <string name="admin_no_disponible">NOT AVAILABLE</string>
+    <string name="admin_editar">Edit</string>
+    <string name="admin_borrar">Delete</string>
+    <string name="admin_editar_producto">EDIT PRODUCT</string>
+    <string name="admin_disponible_texto">Product Available</string>
+    <string name="admin_agotado">Out of stock / Paused</string>
+    <string name="admin_actualizado">Product updated!</string>
+    <string name="admin_cancelar">Cancel</string>
 </resources>

@@ -78,4 +78,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
+
+    // Stripe
+    implementation("com.stripe:stripe-android:21.4.0")
 }
