@@ -12,7 +12,7 @@ data class Pedido(
     val notasGenerales: String? = null,
     val productos: List<DetallePedido> = emptyList(),
     // --- AÑADE ESTOS TRES PARA QUE COINCIDAN CON JAVA ---
-    val metodoPago: String = "Efectivo",
+    val metodoPago: String = "EFECTIVO",
     val cupon: String? = null,
     val descuento: Double = 0.0
 )

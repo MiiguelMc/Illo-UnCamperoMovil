@@ -17,7 +17,7 @@ class CarritoViewModel : ViewModel() {
     var items = mutableStateListOf<ItemCarrito>()
     var enviandoPedido by mutableStateOf(false)
     var notasInput by mutableStateOf("")
-    var metodoPagoSeleccionado by mutableStateOf("Efectivo")
+    var metodoPagoSeleccionado by mutableStateOf("EFECTIVO")
 
     // ── Cupón ────────────────────────────────────────────────────────────────
     var cuponInput by mutableStateOf("")                  // Lo que escribe el usuario

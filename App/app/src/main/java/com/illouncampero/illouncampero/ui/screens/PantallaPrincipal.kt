@@ -543,8 +543,8 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                 // ── Método de pago ────────────────────────────────────────────
                 item {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "Efectivo", onClick = { carritoViewModel.metodoPagoSeleccionado = "Efectivo" }, label = { Text(stringResource(R.string.cesta_efectivo), fontWeight = FontWeight.SemiBold) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo), modifier = Modifier.weight(1f))
-                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "Tarjeta", onClick = { carritoViewModel.metodoPagoSeleccionado = "Tarjeta" }, label = { Text(stringResource(R.string.cesta_tarjeta), fontWeight = FontWeight.SemiBold) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo), modifier = Modifier.weight(1f))
+                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "EFECTIVO", onClick = { carritoViewModel.metodoPagoSeleccionado = "EFECTIVO" }, label = { Text(stringResource(R.string.cesta_efectivo), fontWeight = FontWeight.SemiBold) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo), modifier = Modifier.weight(1f))
+                        FilterChip(selected = carritoViewModel.metodoPagoSeleccionado == "TARJETA", onClick = { carritoViewModel.metodoPagoSeleccionado = "TARJETA" }, label = { Text(stringResource(R.string.cesta_tarjeta), fontWeight = FontWeight.SemiBold) }, colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFFFF3E0), selectedLabelColor = naranjaIllo), modifier = Modifier.weight(1f))
                     }
                 }
 
@@ -584,7 +584,7 @@ fun SeccionCesta(carritoViewModel: CarritoViewModel, usuarioViewModel: UsuarioVi
                             if (usuarioViewModel.nombre.isBlank() || usuarioViewModel.direccion.isBlank() || usuarioViewModel.telefono.isBlank()) {
                                 Toast.makeText(context, msgRellena, Toast.LENGTH_LONG).show()
                             } else {
-                                if (carritoViewModel.metodoPagoSeleccionado == "Tarjeta") mostrarPagoFake = true
+                                if (carritoViewModel.metodoPagoSeleccionado == "TARJETA") mostrarPagoFake = true
                                 else carritoViewModel.finalizarPedido(usuarioViewModel.nombre, usuarioViewModel.telefono, usuarioViewModel.direccion,
                                     { Toast.makeText(context, msgPedidoEnviado, Toast.LENGTH_SHORT).show() },
                                     { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() })
