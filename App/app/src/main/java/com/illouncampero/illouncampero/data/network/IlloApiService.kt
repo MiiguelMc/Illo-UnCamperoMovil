@@ -56,10 +56,9 @@ interface IlloApiService {
         @Body pedido: Pedido
     ): Response<Unit>
 
-    @GET("api/pedidos/usuario/{uid}")
+    @GET("api/pedidos/mis-pedidos")
     suspend fun getMisPedidos(
-        @Header("Authorization") token: String,
-        @Path("uid") uid: String
+        @Header("Authorization") token: String
     ): List<Pedido>
 
     @PATCH("api/pedidos/{id}/estado")
