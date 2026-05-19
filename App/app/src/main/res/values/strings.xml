@@ -1,3 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Illo, un campero</string>
+    <string name="app_name">Illo Un Campero</string>
+
+    <!-- PantallaLogin -->
+    <string name="login_bienvenida">¡Qué pasa, mostro!</string>
+    <string name="login_subtitulo">Loguéate para pedir tu campero favorito</string>
+    <string name="login_email">Correo Electrónico</string>
+    <string name="login_contrasena">Contraseña</string>
+    <string name="login_olvide_clave">¿Olvidaste la clave?</string>
+    <string name="login_boton">¡INICIA SESION!</string>
+    <string name="login_sin_cuenta">NO TENGO CUENTA TODAVÍA</string>
+    <string name="login_error_campos">Rellena todos los campos, fiera</string>
+    <string name="login_logo_desc">Logo Illo Un Campero</string>
+
+    <!-- PantallaRegistro -->
+    <string name="registro_titulo">¡Únete a la familia! 🍔</string>
+    <string name="registro_subtitulo">Crea tu cuenta para empezar a pedir</string>
+    <string name="registro_nombre">Nombre</string>
+    <string name="registro_apellidos">Apellidos</string>
+    <string name="registro_telefono">Teléfono</string>
+    <string name="registro_email">Email</string>
+    <string name="registro_contrasena">Contraseña</string>
+    <string name="registro_confirmar">Confirmar Contraseña</string>
+    <string name="registro_boton">VAMOS A ELLO 🚀</string>
+    <string name="registro_ya_tengo_cuenta">Ya tengo cuenta, volver al login</string>
+    <string name="registro_error_campos">Rellena los campos obligatorios, fiera.</string>
+    <string name="registro_error_contrasenas">Las contraseñas no coinciden.</string>
+    <string name="registro_exito">¡Cuenta creada! Ya eres un Illo más.</string>
+    <string name="registro_dialogo_exito">¡Éxito!</string>
+    <string name="registro_dialogo_atencion">Atención</string>
+    <string name="registro_dialogo_ok">VALE</string>
+
+    <!-- PantallaAdmin -->
+    <string name="admin_titulo">Panel Admin - Illo</string>
+    <string name="admin_gestion_cocina">GESTIÓN DE COCINA</string>
+    <string name="admin_gestion_producto">Gestión de Producto</string>
+    <string name="admin_nombre_campero">Nombre del Campero</string>
+    <string name="admin_precio">Precio (€)</string>
+    <string name="admin_categoria">Categoría</string>
+    <string name="admin_categoria_placeholder">Ej: Camperos</string>
+    <string name="admin_subcategoria">Subcategoría</string>
+    <string name="admin_subcategoria_placeholder">Ej: Pollo</string>
+    <string name="admin_descripcion">Descripción</string>
+    <string name="admin_imagen_url">URL de la Imagen</string>
+    <string name="admin_disponible">Disponible en carta</string>
+    <string name="admin_subir_producto">SUBIR PRODUCTO</string>
+    <string name="admin_productos_actuales">Productos actuales</string>
+    <string name="admin_sin_productos">No hay productos en la carta</string>
+    <string name="admin_producto_guardado">¡Producto guardado!</string>
+    <string name="admin_eliminado">Eliminado: %1$s</string>
+    <string name="admin_cat_label">Cat: %1$s</string>
+
+    <!-- PantallaCocina -->
+    <string name="cocina_titulo">GESTIÓN DE COCINA 👨‍🍳</string>
+    <string name="cocina_atras">Atrás</string>
+    <string name="cocina_refrescar">Refrescar</string>
+    <string name="cocina_sin_comandas">No hay comandas activas</string>
+    <string name="cocina_orden">ORDEN #%1$s</string>
+    <string name="cocina_cliente">Cliente: %1$s</string>
+    <string name="cocina_nota">👉 NOTA: %1$s</string>
+    <string name="cocina_notas_envio">NOTAS ENVÍO: %1$s</string>
+    <string name="cocina_empezar">EMPEZAR A COCINAR</string>
+    <string name="cocina_pasar_reparto">PASAR A REPARTO</string>
+    <string name="cocina_marcar_entregado">MARCAR COMO ENTREGADO</string>
+    <string name="cocina_finalizar">FINALIZAR</string>
+
+    <!-- PantallaConfiguracion -->
+    <string name="config_titulo">Mi Perfil</string>
+    <string name="config_atras">Atrás</string>
+    <string name="config_mis_datos">Mis Datos Actuales</string>
+    <string name="config_nombre">Nombre Completo</string>
+    <string name="config_email">Email (No editable)</string>
+    <string name="config_telefono">Teléfono de contacto</string>
+    <string name="config_direccion">Dirección de entrega</string>
+    <string name="config_guardar">GUARDAR CAMBIOS</string>
+    <string name="config_perfil_actualizado">¡Perfil actualizado!</string>
+    <string name="config_seguridad">Seguridad</string>
+    <string name="config_cambiar_contrasena">Enviar correo para cambiar contraseña</string>
+    <string name="config_volver">VOLVER AL MENÚ</string>
+
+    <!-- PantallaMisPedidos -->
+    <string name="pedidos_titulo">Mis Pedidos</string>
+    <string name="pedidos_atras">Atrás</string>
+    <string name="pedidos_sin_pedidos">Aún no has realizado pedidos</string>
+    <string name="pedidos_numero">Pedido #%1$s</string>
+    <string name="pedidos_total">Total: %1$s€</string>
+    <string name="pedidos_ver_detalles">Ver detalles</string>
+
+    <!-- PantallaDetallePedido -->
+    <string name="detalle_titulo">Detalle de Pedido</string>
+    <string name="detalle_resumen">Resumen de productos</string>
+    <string name="detalle_total">TOTAL:</string>
+    <string name="detalle_info_entrega">Información de Entrega</string>
+    <string name="detalle_cliente">Cliente: %1$s</string>
+    <string name="detalle_direccion">Dirección: %1$s</string>
+    <string name="detalle_telefono">Teléfono: %1$s</string>
+    <string name="detalle_estado">Estado actual: %1$s</string>
+
+    <!-- PantallaPrincipal -->
+    <string name="principal_hola">¡Hola, %1$s! 👋</string>
+    <string name="principal_oferta_dia">OFERTA DEL DÍA</string>
+    <string name="principal_oferta_nombre">Campero Pollo\n+ Patatas</string>
+    <string name="principal_oferta_precio">Solo por 6.50€</string>
+    <string name="principal_oferta_añadir">AÑADIR</string>
+    <string name="principal_oferta_añadida">¡Oferta añadida al carrito!</string>
+    <string name="principal_pide_ahora">PIDE TU CAMPERO AHORA</string>
+    <string name="principal_que_apetece">¿Qué te apetece hoy?</string>
+    <string name="principal_mas_vendidos">Los más vendidos en Málaga 🔥</string>
+    <string name="principal_abierto">Abiertos hasta las 3:00 AM</string>
+    <string name="principal_nombre_negocio">Illo, Un campero</string>
+    <string name="principal_slogan">Los mejores camperos de Málaga</string>
+    <string name="principal_cat_campero">Campero</string>
+    <string name="principal_cat_entrantes">Entrantes</string>
+    <string name="principal_cat_bebidas">Bebidas</string>
+    <string name="principal_inicio">Inicio</string>
+    <string name="principal_carta">Carta</string>
+    <string name="principal_pedir">Pedir</string>
+    <string name="carta_campero">Campero</string>
+    <string name="carta_entrantes">Entrantes</string>
+    <string name="carta_postres">Postres</string>
+    <string name="carta_bebidas">Bebidas</string>
+
+    <!-- Carrito / Cesta -->
+    <string name="cesta_titulo">Tu Pedido</string>
+    <string name="cesta_vacia">Cesta vacía</string>
+    <string name="cesta_notas">Notas para el restaurante</string>
+    <string name="cesta_efectivo">Efectivo</string>
+    <string name="cesta_tarjeta">Tarjeta</string>
+    <string name="cesta_total">Total:</string>
+    <string name="cesta_realizar_pedido">REALIZAR PEDIDO</string>
+    <string name="cesta_pedido_enviado">¡Pedido enviado!</string>
+    <string name="cesta_rellena_perfil">Por favor, rellena tus datos en \'Mi Perfil\' para poder pedir</string>
+    <string name="cesta_pago_seguro">Pago Seguro</string>
+    <string name="cesta_num_tarjeta">Nº Tarjeta</string>
+    <string name="cesta_exp">Exp</string>
+    <string name="cesta_cvv">CVV</string>
+    <string name="cesta_pagar">Pagar Ahora</string>
+    <string name="cesta_pago_realizado">Pago realizado</string>
+
+    <!-- Menú lateral -->
+    <string name="menu_hola">¡Hola, %1$s!</string>
+    <string name="menu_perfil">Mi Perfil</string>
+    <string name="menu_pedidos">Mis Pedidos</string>
+    <string name="menu_cerrar_sesion">Cerrar Sesión</string>
+
+    <!-- Splash -->
+    <string name="splash_logo_desc">Logo Illo</string>
+
+    <!-- Varios -->
+    <string name="sin_productos_categoria">No hay productos en %1$s</string>
+    <string name="varios">VARIOS</string>
+
+    <!-- SeccionInicio -->
+    <string name="inicio_subtitulo">¿Qué vas a pedir hoy?</string>
+    <string name="inicio_ver_todos">Ver todos</string>
+    <string name="inicio_para_picar">Para picar 🍟</string>
+    <string name="inicio_ver_entrantes">Ver entrantes</string>
+    <string name="inicio_para_beber">Para beber 🥤</string>
+    <string name="inicio_ver_bebidas">Ver bebidas</string>
+    <string name="inicio_ofertas_exclusivas">Ofertas exclusivas</string>
+    <string name="inicio_tiempo_limitado">Solo por tiempo limitado ⏰</string>
+    <string name="inicio_hot">HOT</string>
+    <string name="inicio_producto_añadido">¡%1$s añadido!</string>
+    <string name="inicio_añadir">Añadir</string>
+
+    <!-- Cesta / Cupón -->
+    <string name="cesta_subtotal">Subtotal</string>
+    <string name="cesta_descuento">Descuento (%1$d%%)</string>
+    <string name="cupon_tienes_cupon">¿Tienes un cupón?</string>
+    <string name="cupon_placeholder">Ej: LOLO</string>
+    <string name="cupon_aplicar">Aplicar</string>
+    <string name="cupon_quitar">Quitar cupón</string>
+
+    <!-- Admin extra -->
+    <string name="admin_guardado">Guardado</string>
+    <string name="admin_eliminado_ok">Eliminado</string>
+    <string name="admin_no_disponible">NO DISPONIBLE</string>
+    <string name="admin_editar">Editar</string>
+    <string name="admin_borrar">Borrar</string>
+    <string name="admin_editar_producto">EDITAR PRODUCTO</string>
+    <string name="admin_disponible_texto">Producto Disponible</string>
+    <string name="admin_agotado">Agotado / Pausado</string>
+    <string name="admin_actualizado">¡Producto actualizado!</string>
+    <string name="admin_cancelar">Cancelar</string>
 </resources>
