@@ -38,22 +38,28 @@ class PedidoViewModel : ViewModel() {
         viewModelScope.launch {
             cargando = true
             try {
-                // Ahora llama a /api/pedidos/activos
                 val res = repository.obtenerTodosLosPedidos()
+                println("DEBUG_ILLO: Pedidos recibidos del servidor: ${res.size}")
+
                 listaPedidosCocina.clear()
-                // No hace falta filtrar aquí porque tu Spring ya filtra los "activos"
-                listaPedidosCocina.addAll(res.sortedByDescending { it.fecha })
+                // Ordenamos: Los pedidos PENDIENTES primero, y luego por fecha
+                val ordenados = res.sortedWith(compareByDescending<Pedido> { it.fecha })
+                listaPedidosCocina.addAll(ordenados)
+
             } catch (e: Exception) {
-                println("DEBUG_ILLO: Error al cargar -> ${e.message}")
+                // ESTO ES VITAL: Si el error es de GSON aquí lo verás
+                println("DEBUG_ILLO: Error grave cargando cocina -> ${e.localizedMessage}")
+                e.printStackTrace()
             } finally {
                 cargando = false
             }
         }
     }
 
+
     fun avanzarEstado(pedido: Pedido) {
         val nuevoEstado = when (pedido.estado) {
-            "PENDIENTE" -> "COCINANDO"
+            "PENDIENTE_PAGO" -> "COCINANDO"
             "COCINANDO" -> "REPARTO"
             "REPARTO" -> "ENTREGADO"
             else -> null
